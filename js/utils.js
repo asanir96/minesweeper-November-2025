@@ -11,7 +11,12 @@ function renderBoard(mat, selector) {
             const cell = getCellHTML(mat[i][j])
             const className = `cell cell-${i}-${j}`
 
-            strHTML += `<td class="${className}">${cell}</td>`
+            strHTML += `<td class="${className}" 
+                        onClick = "onCellClicked(${i}, ${j}, this)"
+                        oncontextmenu="onCellMarked(${i}, ${j}, this)">
+                            <span class="content">${cell}</span>
+                            <span class="mark"></span>
+                        </td>`
         }
         strHTML += '</tr>'
     }
@@ -119,4 +124,13 @@ function neighborsLoop(board, row, col, func) {
             func(cell, board[i][j])
         }
     }
+}
+
+
+function revealCell(pos) {
+    gBoard[pos.i][pos.j].isRevealed = true
+    gGame.revealedCount++
+
+    const elCellSpan = document.querySelector(`.cell-${pos.i}-${pos.j} .content`)
+    elCellSpan.style.display = 'block'
 }

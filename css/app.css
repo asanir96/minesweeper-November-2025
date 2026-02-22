@@ -18,6 +18,15 @@ table {
 	font-size: 1.5em;
 }
 
+.cell:active {
+	background-color: white;
+}
+
+.cell span {
+	display: none;
+}
+
+
 .game-over {
 	position: absolute;
 	align-items: center;
@@ -119,4 +128,3 @@ button {
 	background-color: gold;
 	transition: 1s;
 }
-
