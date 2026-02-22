@@ -1,0 +1,122 @@
+body {
+	position: relative;
+	background-color: black;
+	text-align: center;
+	color: lightgray;
+	font-family: Arial, Helvetica, sans-serif;
+}
+
+table {
+	margin: 100px auto;
+	border: 1px solid lightgray;
+}
+
+.cell {
+	border: 1px solid lightgray;
+	width: 40px;
+	height: 40px;
+	font-size: 1.5em;
+}
+
+.game-over {
+	position: absolute;
+	align-items: center;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+
+
+	display: none;
+	width: 300px;
+	height: 300px;
+
+	padding: 5px;
+	background-color: transparent;
+}
+
+button {
+	position: relative;
+	bottom: 30%;
+}
+
+.game-over div {
+	margin: 10px auto;
+	height: 80%;
+	width: 80%;
+}
+
+.game-over div img {
+	width: 100%;
+	height: 100%;
+}
+
+.pacman {
+	opacity: 1;
+	width: 100%;
+	height: 100%;
+	background-color: yellow;
+	transition: 1s;
+
+	-webkit-mask-image: url("../img/pacman-2.png");
+	mask-image: url("../img/pacman-2.png");
+	-webkit-mask-size: contain;
+	mask-size: contain;
+	-webkit-mask-repeat: no-repeat;
+	mask-repeat: no-repeat;
+}
+
+.pacman.left {
+	transform: rotateY(-180deg);
+}
+
+.pacman.up {
+	rotate: -90deg;
+}
+
+.pacman.down {
+	rotate: 90deg;
+}
+
+.ghost-container {
+	width: 100%;
+	height: 100%;
+	color: red;
+	/* background-color: red; */
+	transition: 4s;
+
+	-webkit-mask-image: url("../img/ghost-3.png");
+	mask-image: url("../img/ghost-3.png");
+	-webkit-mask-size: contain;
+	mask-size: contain;
+	-webkit-mask-repeat: no-repeat;
+	mask-repeat: no-repeat;
+}
+
+.ghost-container.scared {
+	width: 100%;
+	height: 100%;
+	background-color: rgba(81, 37, 255, 0.715);
+
+	-webkit-mask-image: url("../img/scared-ghost.png");
+	mask-image: url("../img/scared-ghost.png");
+	-webkit-mask-size: contain;
+	mask-size: contain;
+	-webkit-mask-repeat: no-repeat;
+	mask-repeat: no-repeat;
+}
+
+.pacman.dead {
+	background-color: red;
+	opacity: 0;
+}
+
+.super-food {
+	margin: auto auto;
+	/* opacity: 0.2; */
+	height: 30%;
+	width: 30%;
+	border-radius: 100%;
+	background-color: gold;
+	transition: 1s;
+}
+
