@@ -25,8 +25,11 @@ function buildBoard() {
             board[i].push(cell)
         }
     }
+
     board[1][1].isMine = true
-    board[2][2].isMine = true
+    board[3][2].isMine = true
+
+    setMinesNegsCount(board)
     return board
 }
 
@@ -39,4 +42,17 @@ function createCell() {
     }
 
     return cell
+}
+
+
+function setMinesNegsCount(board) {
+    for (var i = 0; i < board.length; i++) {
+        for (var j = 0; j < board[i].length; j++) {
+            neighborsLoop(board, i, j, updateNegs)
+        }
+    }
+}
+
+function updateNegs(cell, neighborCell) {
+    if (neighborCell.isMine) cell.minesAroundCount++
 }

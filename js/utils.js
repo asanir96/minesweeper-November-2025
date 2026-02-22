@@ -101,6 +101,22 @@ function getRandomEmptyPos() {
 }
 
 function getCellHTML(cell) {
-    const cellHTML = cell.isMine ? MINE : EMPTY
+    const cellHTML = cell.isMine ? MINE : cell.minesAroundCount
     return cellHTML
+}
+
+
+function neighborsLoop(board, row, col, func) {
+    const cell = board[row][col]
+
+    for (var i = row - 1; i <= row + 1; i++) {
+        if (i < 0 || i >= board.length) continue
+
+        for (var j = col - 1; j <= col + 1; j++) {
+            if (j < 0 || j >= board[i].length) continue
+            if (i === row && j === col) continue
+
+            func(cell, board[i][j])
+        }
+    }
 }
