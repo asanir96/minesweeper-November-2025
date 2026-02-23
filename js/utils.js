@@ -8,7 +8,8 @@ function renderBoard(mat, selector) {
         strHTML += '<tr>'
         for (var j = 0; j < mat[0].length; j++) {
 
-            const cell = getCellHTML(mat[i][j])
+            // const cell = getCellHTML(mat[i][j])
+            const cell = 0
             const className = `cell cell-${i}-${j}`
 
             strHTML += `<td class="${className}" 
@@ -26,6 +27,20 @@ function renderBoard(mat, selector) {
     elContainer.innerHTML = strHTML
 }
 
+function renderUpdatedBoard(mat) {
+    for (var i = 0; i < mat.length; i++) {
+        for (var j = 0; j < mat[0].length; j++) {
+
+            const cellHTML = getCellHTML(mat[i][j])
+            const className = `.cell.cell-${i}-${j}`
+            const elCellContent = document.querySelector(className + ' .content')
+            console.log('elCellContent',elCellContent)
+            elCellContent.innerText = cellHTML
+
+        }
+    }
+}
+
 // pos is an object like this - { i: 2, j: 7 }
 function renderCell(pos, value) {
     // Select the elCell and set the value
@@ -38,8 +53,17 @@ function renderCell(pos, value) {
     // }
 }
 
-function getRandomIntInclusive(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min
+function getRandomInt(min, max) {
+    const minCeiled = Math.ceil(min);
+    const maxFloored = Math.floor(max);
+    return Math.floor(Math.random() * (maxFloored - minCeiled) + minCeiled); // The maximum is exclusive and the minimum is inclusive
+}
+
+function getRandomEmptyPos() {
+    const emptyPos = getEmptyPos()
+    const randIdx = getRandomInt(0, emptyPos.length)
+
+    return emptyPos[randIdx]
 }
 
 function getFoodCount() {
@@ -74,12 +98,12 @@ function getEmptyPos() {
     var emptyPos = []
     for (var i = 0; i < gBoard.length; i++) {
         for (var j = 0; j < gBoard.length; j++) {
-            if (gBoard[i][j] !== WALL &&
-                gBoard[i][j] !== PACMAN &&
-                gBoard[i][j] !== GHOST
-            ) emptyPos.push({ i, j })
+            if (!gBoard[i][j].isMine &&
+                !gBoard[i][j].isRevealed) emptyPos.push({ i, j })
         }
     }
+
+    console.log('emptyPos', emptyPos)
 
     return emptyPos
 }
@@ -96,14 +120,14 @@ function clearTimeouts() {
     }
 }
 
-function getRandomEmptyPos() {
-    const emptyPos = getEmptyPos()
+// function getRandomEmptyPos() {
+//     const emptyPos = getEmptyPos()
 
-    const randI = getRandomIntInclusive(0, emptyPos.length - 1)
-    const randEmptyPos = emptyPos[randI]
+//     const randI = getRandomIntInclusive(0, emptyPos.length - 1)
+//     const randEmptyPos = emptyPos[randI]
 
-    return randEmptyPos
-}
+//     return randEmptyPos
+// }
 
 function getCellHTML(cell) {
     const cellHTML = cell.isMine ? MINE : cell.minesAroundCount
@@ -128,9 +152,59 @@ function neighborsLoop(board, row, col, func) {
 
 
 function revealCell(pos) {
-    gBoard[pos.i][pos.j].isRevealed = true
+    const cell = gBoard[pos.i][pos.j]
+    cell.isRevealed = true
     gGame.revealedCount++
 
     const elCellSpan = document.querySelector(`.cell-${pos.i}-${pos.j} .content`)
+    if (!cell.isMine) elCellSpan.innerText = cell.minesAroundCount
+
     elCellSpan.style.display = 'block'
+}
+
+function getRandomMinePos() {
+
+}
+
+function getPossibleMinePos(board) {
+    var possibleMinePos = []
+    for (var i = 0; i < board.length; i++) {
+        for (var j = 0; j < board.length; j++) {
+            if (!gBoard[i][j].isMine &&
+                !(gBoard[i][j].minesAroundCount === 0) &&
+                !gBoard[i][j].isRevealed &&
+                !isCountZeroNegs(board, i, j)) possibleMinePos.push({ i, j })
+        }
+    }
+
+    return possibleMinePos
+}
+
+function getRandPossibleMinePos(board) {
+    const possibleMinePos = getPossibleMinePos(board)
+    const randIdx = getRandomInt(0, possibleMinePos.length)
+
+    return possibleMinePos[randIdx]
+}
+
+
+function isCountZeroNegs(cell, neighborCell) {
+    if (neighborCell.minesAroundCount === 0) cell.minesAroundCount++
+}
+
+
+
+function isCountZeroNegs(board, row, col) {
+    for (var i = row - 1; i <= row + 1; i++) {
+        if (i < 0 || i >= board.length) continue
+
+        for (var j = col - 1; j <= col + 1; j++) {
+            if (j < 0 || j >= board[i].length) continue
+            if (i === row && j === col) continue
+
+            if (board[i][j].minesAroundCount === 0) return true
+        }
+    }
+
+    return false
 }
