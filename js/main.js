@@ -7,12 +7,15 @@ document.addEventListener('contextmenu', function (event) {
 const MINE = '💣'
 const EMPTY = ''
 const MARK = '🚩'
-
+const FACE = '🙂'
+const HAPPY = '😀'
+const DEAD = '😵'
+const EXPLOSION = '💥'
 var gBoard
 var gGame
 var gLevel = {
-    SIZE: 8,
-    MINES: 14
+    SIZE: 4,
+    MINES: 2
 }
 
 function onInit() {
@@ -21,7 +24,6 @@ function onInit() {
 
     gGame = createGame()
     gGame.isOn = true
-    console.log('gBoard', gBoard)
 }
 
 function buildBoard() {
@@ -91,8 +93,15 @@ function onCellClicked(i, j, elCell) {
     if (gBoard[i][j].isRevealed || gBoard[i][j].isMarked) return
 
     if (gBoard[i][j].isMine) {
-        revealCell({ i, j })
-        gGame.isOn = false
+        mineClicked(i, j)
+        // revealCell({ i, j })
+        // gGame.isOn = false
+
+        // const elCellContent = document.querySelector(`.cell.cell-${i}-${j} .content`)
+        // elCellContent.innerText = EXPLOSION
+        // updateGameEmoji(DEAD)
+        // const elGameStatus = document.querySelector('.game-status')
+        // elGameStatus.innerText = DEAD
         return
     }
 
@@ -135,7 +144,8 @@ function expandReveal(board, elCell, i, j) {
         revealCell({ i, j })
         return
     }
-
+    updateGameEmoji(HAPPY)
+    setTimeout(updateGameEmoji, 1000, FACE);
     revealCell({ i, j })
 
     expandReveal(board, elCell, i + 1, j)
@@ -146,11 +156,10 @@ function expandReveal(board, elCell, i, j) {
 
 
 function checkGameOver() {
-    console.log('gGame.revealedCount', gGame.revealedCount)
     if (gGame.revealedCount === gLevel.SIZE ** 2 - gLevel.MINES && gGame.markedCount === gLevel.MINES) {
+        blowMines()
+        revealMines()
         gGame.isOn = false
-        const elGameOver = document.querySelector('.game-over')
-        elGameOver.style.display = 'block'
     }
 
 }
@@ -158,7 +167,6 @@ function checkGameOver() {
 function addMines(pos) {
     for (var i = 0; i < gLevel.MINES; i++) {
         var randPossibleMinePos = getRandPossibleMinePos(gBoard)
-        console.log('randPossibleMinePos', randPossibleMinePos)
         // var distI = Math.abs(randEmptyPos.i - pos.i)
         // var distJ = Math.abs(randEmptyPos.j - pos.j)
         // console.log('randEmptyPos',randEmptyPos)
@@ -174,4 +182,36 @@ function addMines(pos) {
         gBoard[randPossibleMinePos.i][randPossibleMinePos.j].isMine = true
     }
 
+}
+
+function mineClicked(i, j) {
+
+    const elCellContent = document.querySelector(`.cell.cell-${i}-${j} .content`)
+    elCellContent.innerText = EXPLOSION
+    revealCell({ i, j })
+    updateGameEmoji(DEAD)
+    revealMines()
+    gGame.isOn = false
+}
+
+function revealMines() {
+    for (var i = 0; i < gBoard.length; i++) {
+        for (var j = 0; j < gBoard.length; j++) {
+            if (gBoard[i][j].isMine && !gBoard[i][j].isRevealed) {
+                const elCellMark = document.querySelector(`.cell.cell-${i}-${j} .mark`)
+                elCellMark.innerText = EMPTY
+                revealCell({ i, j })
+            }
+        }
+    }
+}
+function blowMines() {
+    for (var i = 0; i < gBoard.length; i++) {
+        for (var j = 0; j < gBoard.length; j++) {
+            if (gBoard[i][j].isMine && !gBoard[i][j].isRevealed) {
+                const elCellContent = document.querySelector(`.cell.cell-${i}-${j} .content`)
+                elCellContent.innerText = EXPLOSION
+            }
+        }
+    }
 }

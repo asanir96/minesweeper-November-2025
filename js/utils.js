@@ -3,6 +3,8 @@
 function renderBoard(mat, selector) {
 
     var strHTML = '<table><tbody>'
+    strHTML += `<tr><td class = "game-emoji" colspan="${mat[0].length}">${FACE}</td></tr>
+`
     for (var i = 0; i < mat.length; i++) {
 
         strHTML += '<tr>'
@@ -34,7 +36,6 @@ function renderUpdatedBoard(mat) {
             const cellHTML = getCellHTML(mat[i][j])
             const className = `.cell.cell-${i}-${j}`
             const elCellContent = document.querySelector(className + ' .content')
-            console.log('elCellContent',elCellContent)
             elCellContent.innerText = cellHTML
 
         }
@@ -102,9 +103,6 @@ function getEmptyPos() {
                 !gBoard[i][j].isRevealed) emptyPos.push({ i, j })
         }
     }
-
-    console.log('emptyPos', emptyPos)
-
     return emptyPos
 }
 
@@ -152,13 +150,17 @@ function neighborsLoop(board, row, col, func) {
 
 
 function revealCell(pos) {
+    console.log('pos',pos)
     const cell = gBoard[pos.i][pos.j]
     cell.isRevealed = true
     gGame.revealedCount++
 
-    const elCellSpan = document.querySelector(`.cell-${pos.i}-${pos.j} .content`)
+    const elCell = document.querySelector(`.cell-${pos.i}-${pos.j}`)
+    console.log('elCell',elCell)
+    const elCellSpan = elCell.querySelector(`.content`)
     if (!cell.isMine) elCellSpan.innerText = cell.minesAroundCount
-
+    
+    elCell.classList.toggle('revealed')
     elCellSpan.style.display = 'block'
 }
 
@@ -207,4 +209,9 @@ function isCountZeroNegs(board, row, col) {
     }
 
     return false
+}
+
+function updateGameEmoji(status) {
+    const elGameEmoji = document.querySelector('.game-emoji')
+    elGameEmoji.innerText = status
 }
