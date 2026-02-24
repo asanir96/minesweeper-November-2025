@@ -9,7 +9,7 @@ body {
 table {
 	background-color: grey;
 	box-shadow: 5px 5px 5px 5px rgb(61, 60, 60);
-	margin: 100px auto;
+	margin: 30px auto;
 	/* border: 1px solid lightgray; */
 }
 
@@ -24,6 +24,10 @@ tbody {
 	width: 40px;
 	height: 40px;
 	font-size: 1.5em;
+}
+
+.content {
+	color: black;
 }
 
 .cell:active {
@@ -41,9 +45,30 @@ tbody {
 }
 
 .game-emoji {
-	box-shadow: inset 1px 1px 1px 1px rgb(62, 62, 62);
+	background-color: grey;
 
-	margin-top: 30px;
+	box-shadow: inset 1px 1px 1px 1px rgb(62, 62, 62);
+	/* padding: 3px; */
+	margin-left: 20px;
+	margin-right: 20px;
+	margin-top: 100px;
+	font-size: 30px;
+}
+
+.game-emoji:active {
+	background-color: rgb(69, 68, 68);
+}
+
+.stop-watch{
+		background-color: grey;
+
+	box-shadow: inset 1px 1px 1px 1px rgb(62, 62, 62);
+	padding: 3px;
+	margin: auto;
+	color:rgb(1, 71, 1);
+	/* margin-left: 20px;
+	margin-right: 20px;
+	margin-top: 100px; */
 	font-size: 30px;
 }
 
@@ -79,72 +104,6 @@ button {
 	height: 100%;
 }
 
-.pacman {
-	opacity: 1;
-	width: 100%;
-	height: 100%;
-	background-color: yellow;
-	transition: 1s;
-
-	-webkit-mask-image: url("../img/pacman-2.png");
-	mask-image: url("../img/pacman-2.png");
-	-webkit-mask-size: contain;
-	mask-size: contain;
-	-webkit-mask-repeat: no-repeat;
-	mask-repeat: no-repeat;
-}
-
-.pacman.left {
-	transform: rotateY(-180deg);
-}
-
-.pacman.up {
-	rotate: -90deg;
-}
-
-.pacman.down {
-	rotate: 90deg;
-}
-
-.ghost-container {
-	width: 100%;
-	height: 100%;
-	color: red;
-	/* background-color: red; */
-	transition: 4s;
-
-	-webkit-mask-image: url("../img/ghost-3.png");
-	mask-image: url("../img/ghost-3.png");
-	-webkit-mask-size: contain;
-	mask-size: contain;
-	-webkit-mask-repeat: no-repeat;
-	mask-repeat: no-repeat;
-}
-
-.ghost-container.scared {
-	width: 100%;
-	height: 100%;
-	background-color: rgba(81, 37, 255, 0.715);
-
-	-webkit-mask-image: url("../img/scared-ghost.png");
-	mask-image: url("../img/scared-ghost.png");
-	-webkit-mask-size: contain;
-	mask-size: contain;
-	-webkit-mask-repeat: no-repeat;
-	mask-repeat: no-repeat;
-}
-
-.pacman.dead {
-	background-color: red;
-	opacity: 0;
-}
-
-.super-food {
-	margin: auto auto;
-	/* opacity: 0.2; */
-	height: 30%;
-	width: 30%;
-	border-radius: 100%;
-	background-color: gold;
-	transition: 1s;
+.board-container {
+	align-items: center;
 }

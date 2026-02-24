@@ -11,11 +11,29 @@ const FACE = '🙂'
 const HAPPY = '😀'
 const DEAD = '😵'
 const EXPLOSION = '💥'
+const VICTORY = '😎'
+const COLORS = {
+    '0': 'transparent',
+    '1': 'blue',
+    '2': 'green',
+    '3': 'red',
+    '4': 'red',
+    '5': 'red',
+    '6': 'red',
+    '7': 'red',
+    '8': 'red',
+}
+var gStopWatchInterval
+var gStartTime
 var gBoard
 var gGame
+const BEGINNER = { size: 4, mines: 2 }
+const MEDIUM = { size: 8, mines: 14 }
+const EXPERT = { size: 12, mines: 32 }
+
 var gLevel = {
-    SIZE: 4,
-    MINES: 2
+    SIZE: BEGINNER.size,
+    MINES: BEGINNER.mines
 }
 
 function onInit() {
@@ -82,11 +100,7 @@ function onCellClicked(i, j, elCell) {
     if (!gGame.isOn) return
 
     if (gGame.revealedCount === 0 && gGame.markedCount === 0) {
-        gBoard[i][j].minesAroundCount = 0
-        addMines({ i, j })
-        setMinesNegsCount(gBoard)
-        expandReveal(gBoard, elCell, i, j)
-        renderUpdatedBoard(gBoard)
+        initClick(i, j, elCell)
         return
     }
 
@@ -94,14 +108,6 @@ function onCellClicked(i, j, elCell) {
 
     if (gBoard[i][j].isMine) {
         mineClicked(i, j)
-        // revealCell({ i, j })
-        // gGame.isOn = false
-
-        // const elCellContent = document.querySelector(`.cell.cell-${i}-${j} .content`)
-        // elCellContent.innerText = EXPLOSION
-        // updateGameEmoji(DEAD)
-        // const elGameStatus = document.querySelector('.game-status')
-        // elGameStatus.innerText = DEAD
         return
     }
 
@@ -148,10 +154,21 @@ function expandReveal(board, elCell, i, j) {
     setTimeout(updateGameEmoji, 1000, FACE);
     revealCell({ i, j })
 
-    expandReveal(board, elCell, i + 1, j)
-    expandReveal(board, elCell, i - 1, j)
-    expandReveal(board, elCell, i, j + 1)
-    expandReveal(board, elCell, i, j - 1)
+    expandRevealNegs(board, i, j, elCell)
+    // for (var row = i - 1; row <= i + 1; row++) {
+    //     if (row < 0 || row >= board.length) continue
+
+    //     for (var col = j - 1; col <= j + 1; col++) {
+    //         if (col < 0 || col >= board[row].length) continue
+    //         if (i === row && j === col) continue
+
+    //         // func(cell, board[i][j])
+    //         expandReveal(board, elCell, row, col)
+    //     }
+    // }
+    // expandReveal(board, elCell, i - 1, j)
+    // expandReveal(board, elCell, i, j + 1)
+    // expandReveal(board, elCell, i, j - 1)
 }
 
 
@@ -160,6 +177,7 @@ function checkGameOver() {
         blowMines()
         revealMines()
         gGame.isOn = false
+        updateGameEmoji(VICTORY)
     }
 
 }
@@ -192,6 +210,7 @@ function mineClicked(i, j) {
     updateGameEmoji(DEAD)
     revealMines()
     gGame.isOn = false
+    clearInterval(gStopWatchInterval)
 }
 
 function revealMines() {
@@ -214,4 +233,81 @@ function blowMines() {
             }
         }
     }
+}
+
+function expandRevealNegs(board, i, j, elCell) {
+    for (var row = i - 1; row <= i + 1; row++) {
+        if (row < 0 || row >= board.length) continue
+
+        for (var col = j - 1; col <= j + 1; col++) {
+            if (col < 0 || col >= board[row].length) continue
+            if (i === row && j === col) continue
+
+            // func(cell, board[i][j])
+            expandReveal(board, elCell, row, col)
+        }
+    }
+}
+
+function onLevelSelect(level) {
+    gLevel = {
+        SIZE: level.size,
+        MINES: level.mines
+    }
+
+    onInit()
+}
+
+function onRestart() {
+    clearInterval(gStopWatchInterval)
+    onInit()
+}
+
+function updateTimePassed() {
+    const currTime = Date.now()
+    const delta = currTime - gStartTime
+    const secs = Math.floor(delta / 1000)
+    const milliSecs = (delta % 1000) / 1000
+
+    gGame.timePassed = roundTo(secs + milliSecs, 1)
+    renderTimePassed()
+}
+
+function renderTimePassed() {
+    const elStopWatch = document.querySelector('.stop-watch')
+
+    elStopWatch.innerText = gGame.timePassed % 1 === 0 ? gGame.timePassed + '.0' : gGame.timePassed
+}
+
+
+function startTimer() {
+    gGame.timerOn = true
+    gGame.startTime = new Date(Date.now())
+    gInterval = setInterval(showTime, 1)
+}
+
+function showTime() {
+    var currTime = new Date(Date.now())
+    var delta = new Date(currTime - gGame.startTime)
+    var minutes = delta.getMinutes()
+
+    const elStopWatch = document.querySelector('.stop-watch span')
+
+    if (delta.getSeconds() >= 60) {
+        gStopperMinutes
+    }
+    elStopWatch.innerText = `${minutes * 60 + delta.getSeconds()}:${delta.getMilliseconds()}`
+}
+
+function initClick(i, j, elCell) {
+    gBoard[i][j].minesAroundCount = 0
+    addMines({ i, j })
+    setMinesNegsCount(gBoard)
+    expandReveal(gBoard, elCell, i, j)
+    renderUpdatedBoard(gBoard)
+
+
+    gStartTime = Date.now()
+    console.log('gStartTime', gStartTime)
+    gStopWatchInterval = setInterval(updateTimePassed, 1)
 }

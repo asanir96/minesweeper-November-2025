@@ -3,8 +3,10 @@
 function renderBoard(mat, selector) {
 
     var strHTML = '<table><tbody>'
-    strHTML += `<tr><td class = "game-emoji" colspan="${mat[0].length}">${FACE}</td></tr>
-`
+    // strHTML += `<tr><td class = "game-emoji" colspan="${mat[0].length}">${FACE}</td></tr>`
+    strHTML += `<button class = "game-emoji" onclick = "onRestart()">🙂</button>`
+    strHTML += `<span class="stop-watch">0.0</span>`
+
     for (var i = 0; i < mat.length; i++) {
 
         strHTML += '<tr>'
@@ -24,6 +26,9 @@ function renderBoard(mat, selector) {
         strHTML += '</tr>'
     }
     strHTML += '</tbody></table>'
+    strHTML += `<button class = "level-btn" onClick ="onLevelSelect(BEGINNER)">Beginner</button>`
+    strHTML += `<button class = "level-btn" onClick ="onLevelSelect(MEDIUM)">Medium</button>`
+    strHTML += `<button class = "level-btn" onClick ="onLevelSelect(EXPERT)">Expert</button>`
 
     const elContainer = document.querySelector(selector)
     elContainer.innerHTML = strHTML
@@ -37,6 +42,7 @@ function renderUpdatedBoard(mat) {
             const className = `.cell.cell-${i}-${j}`
             const elCellContent = document.querySelector(className + ' .content')
             elCellContent.innerText = cellHTML
+            elCellContent.style.color = COLORS[mat[i][j].minesAroundCount]
 
         }
     }
@@ -149,17 +155,16 @@ function neighborsLoop(board, row, col, func) {
 }
 
 
+
 function revealCell(pos) {
-    console.log('pos',pos)
     const cell = gBoard[pos.i][pos.j]
     cell.isRevealed = true
     gGame.revealedCount++
 
     const elCell = document.querySelector(`.cell-${pos.i}-${pos.j}`)
-    console.log('elCell',elCell)
     const elCellSpan = elCell.querySelector(`.content`)
     if (!cell.isMine) elCellSpan.innerText = cell.minesAroundCount
-    
+
     elCell.classList.toggle('revealed')
     elCellSpan.style.display = 'block'
 }
@@ -214,4 +219,9 @@ function isCountZeroNegs(board, row, col) {
 function updateGameEmoji(status) {
     const elGameEmoji = document.querySelector('.game-emoji')
     elGameEmoji.innerText = status
+}
+
+function roundTo(num, precision) {
+  const factor = Math.pow(10, precision);
+  return Math.round(num * factor) / factor;
 }
