@@ -12,6 +12,8 @@ const HAPPY = '😀'
 const DEAD = '😵'
 const EXPLOSION = '💥'
 const VICTORY = '😎'
+const LOSE_LOGO = `<img src="img/game-over-logo.png" alt="">`
+const WIN_LOGO = `<img src="img/win-logo.png" alt="">`
 const COLORS = {
     '0': 'transparent',
     '1': 'blue',
@@ -90,7 +92,8 @@ function createGame() {
         isOn: false,
         revealedCount: 0,
         markedCount: 0,
-        secsPassed: 0
+        secsPassed: 0,
+        isWin: false
     }
 
     return game
@@ -174,10 +177,13 @@ function expandReveal(board, elCell, i, j) {
 
 function checkGameOver() {
     if (gGame.revealedCount === gLevel.SIZE ** 2 - gLevel.MINES && gGame.markedCount === gLevel.MINES) {
+        gGame.isWin = true
+        gGame.isOn = false
         blowMines()
         revealMines()
-        gGame.isOn = false
         updateGameEmoji(VICTORY)
+        clearInterval(gStopWatchInterval)
+        showGameOverModal()
     }
 
 }
@@ -210,6 +216,7 @@ function mineClicked(i, j) {
     updateGameEmoji(DEAD)
     revealMines()
     gGame.isOn = false
+    showGameOverModal()
     clearInterval(gStopWatchInterval)
 }
 
@@ -254,11 +261,12 @@ function onLevelSelect(level) {
         SIZE: level.size,
         MINES: level.mines
     }
-
+    clearInterval(gStopWatchInterval)
     onInit()
 }
 
 function onRestart() {
+    hideGameOverModal()
     clearInterval(gStopWatchInterval)
     onInit()
 }
@@ -308,6 +316,19 @@ function initClick(i, j, elCell) {
 
 
     gStartTime = Date.now()
-    console.log('gStartTime', gStartTime)
     gStopWatchInterval = setInterval(updateTimePassed, 1)
+}
+
+
+function showGameOverModal() {
+    const elGameOverModal = document.querySelector('.game-over')
+    const elGameOverMessage = elGameOverModal.querySelector('div')
+
+    elGameOverMessage.innerHTML = gGame.isWin ? WIN_LOGO : LOSE_LOGO
+    elGameOverModal.style.display = 'block'
+
+}
+function hideGameOverModal() {
+    const elGameOverModal = document.querySelector('.game-over')
+    elGameOverModal.style.display = 'none'
 }
