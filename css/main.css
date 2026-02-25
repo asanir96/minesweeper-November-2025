@@ -1,0 +1,42 @@
+body {
+    text-align: center;
+}
+
+.box {
+    max-width: 600px;
+    padding: 10px;
+    border: 1px solid lightblue;
+    border-radius: 4px;
+    margin: 10px auto;
+}
+
+.box img {
+    display: block;
+    margin: auto;
+    cursor: pointer;
+}
+
+.mark {
+    background-color: lightblue;
+}
+
+.mark:hover {
+    color: white;
+    cursor: pointer;
+}
+
+.modal {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+
+    display: none;
+    width: 300px;
+
+    padding: 5px;
+    background-color: lightseagreen;
+}
+
+.modal button {
+    float: right;
+}
