@@ -35,7 +35,6 @@ var gSession = {
     lName: null
 }
 
-
 var gStoredGames
 var gScoreBoard
 var gStartTime
@@ -142,7 +141,7 @@ function createGame() {
 function onCellClicked(i, j, elCell) {
     if (!gGame.isOn || isSessionOff()) return
 
-    if (gGame.revealedCount === 0 && gGame.markedCount === 0) {
+    if (!isInitClicked()) {
         initClick(i, j, elCell)
         return
     }
@@ -165,7 +164,7 @@ function onCellClicked(i, j, elCell) {
 }
 
 function onCellMarked(i, j, elCell) {
-    if (!gGame.isOn || isSessionOff()) return
+    if (!gGame.isOn || isSessionOff() || !isInitClicked()) return
 
     if (gBoard[i][j].isRevealed) return
 
@@ -406,7 +405,7 @@ function hideSessionForm() {
 
     elBoardContainer.style.opacity = '1.0'
     elScoreBoard.style.opacity = '1.0'
-    
+
     const elSessionForm = document.querySelector('.session-form')
     elSessionForm.style.display = 'none'
 }
@@ -465,4 +464,9 @@ function getGameLevel() {
         case EXPERT.size:
             return 'Expert'
     }
+}
+
+
+function isInitClicked() {
+return (gGame.revealedCount !== 0 || gGame.markedCount !== 0)
 }
