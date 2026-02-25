@@ -1,100 +1,232 @@
 'use strict'
-var gIsMark = false
-const gModal = { text: 'You were blessed at ', CurrTimeStr: '' }
-var gTimeoutId
-const ninjaImgSrc = "img/ninja.png"
-const caImgSrc = 'img/ca.png'
+
+document.addEventListener('contextmenu', function (event) {
+    event.preventDefault()
+    return false
+})
+
+const MINE = '💣'
+const EMPTY = ''
+const MARK = '🚩'
+const FACE = '🙂'
+const HAPPY = '😀'
+const DEAD = '😵'
+const EXPLOSION = '💥'
+const VICTORY = '😎'
+const LOSE_LOGO = `<img src="img/game-over-logo.png" alt="">`
+const WIN_LOGO = `<img src="img/win-logo.png" alt="">`
+
+const COLORS = {
+    '0': 'transparent',
+    '1': 'blue',
+    '2': 'green',
+    '3': 'red',
+    '4': 'red',
+    '5': 'red',
+    '6': 'red',
+    '7': 'red',
+    '8': 'red',
+}
+
+const BEGINNER = { size: 4, mines: 2 }
+const MEDIUM = { size: 8, mines: 14 }
+const EXPERT = { size: 12, mines: 32 }
+
+var gStopWatchInterval
+var gStoredGames
+var gScoreBoard
+var gStartTime
+var gBoard
+var gGame
+
+var gSession = {
+    fName: null,
+    lName: null
+}
+
+var gLevel = {
+    SIZE: BEGINNER.size,
+    MINES: BEGINNER.mines
+}
 
 function onInit() {
-    const elH1 = document.querySelector('h1')
-    setTimeout(() => {
-        elH1.innerText = 'I Love JS'
-    }, 3000)
+    gGame = createGame()
+
+    const storedGamesStr = localStorage.getItem(gGame.level)
+    gStoredGames = storedGamesStr === null ? [] : JSON.parse(storedGamesStr)
+    gStoredGames = bubbleSort(gStoredGames)
+
+    hideGameOverModal()
+    renderScoreBoard(gStoredGames, 10)
+
+    showSessionForm()
+    gBoard = buildBoard()
+    renderBoard(gBoard, '.board-container')
+
+    gGame.isOn = true
 }
 
-function onMark(elBtn) {
-    mark('.box span')
-    if (!gIsMark) {
-        // mark('.box span')
-        elBtn.innerText = 'Unmark'
-        gIsMark = true
-    } else {
-        mark('.box span')
-        elBtn.innerText = 'Mark'
-        gIsMark = false
+function createGame() {
+    const game = {
+        level: getGameLevel(),
+        isOn: false,
+        revealedCount: 0,
+        markedCount: 0,
+        secsPassed: 0,
+        isWin: false
+    }
 
+    return game
+}
+
+function buildBoard() {
+    var board = []
+
+    for (var i = 0; i < gLevel.SIZE; i++) {
+        board.push([])
+        for (var j = 0; j < gLevel.SIZE; j++) {
+            var cell = createCell()
+            board[i].push(cell)
+        }
+    }
+
+    return board
+}
+
+function buildScoreBoard(sessions) {
+    if (!sessions) return null
+
+    var scoreBoard = []
+
+    for (var i = 0; i < sessions.length; i++) {
+        var currSession = sessions[i]
+        scoreBoard.push([`${currSession.fName}_${currSession.lName}_${currSession.id}`])
+        scoreBoard.push([currSession.secsPassed])
+    }
+    console.log('scoreBoard', scoreBoard)
+    return scoreBoard
+}
+
+function createCell() {
+    var cell = {
+        minesAroundCount: null,
+        isRevealed: false,
+        isMine: false,
+        isMarked: false
+    }
+
+    return cell
+}
+
+function setMinesNegsCount(board) {
+    for (var i = 0; i < board.length; i++) {
+        for (var j = 0; j < board[i].length; j++) {
+            if (!board[i][j].isMine) board[i][j].minesAroundCount = 0
+            neighborsLoop(board, i, j, updateMineNegs)
+        }
     }
 }
 
-function onMouseEnter(elImg) {
-    elImg.src = caImgSrc
+function updateMineNegs(cell, neighborCell) {
+    if (neighborCell.isMine) cell.minesAroundCount++
 }
 
-function onMouseLeave(elImg) {
-    elImg.src = ninjaImgSrc
-}
-
-function onChangeSubHeader(elSpan) {
-    if (!gIsMark) return
-    
-    var elH2Span = document.querySelector('h2 span')
-    elH2Span.innerText = elSpan.innerText
-}
-
-function onHandleKey(ev) {
-    if (ev.key !== 'Escape')
+function expandReveal(board, elCell, i, j) {
+    if (i >= gBoard.length || i < 0 ||
+        j >= gBoard[0].length || j < 0 ||
+        board[i][j].isMine ||
+        board[i][j].isRevealed ||
+        board[i][j].isMarked) {
         return
-    var elBtn = document.querySelector('.modal button')
-    onCloseModal(elBtn)
-}
-
-function openModal() {
-    clearTimeout(gTimeoutId)
-    const modal = document.querySelector('.modal')
-    modal.style.display = 'block'
-    gTimeoutId = setTimeout(onCloseModal, 5000)
-}
-
-function onCloseModal(elBtn) {
-    if (elBtn) clearTimeout(gTimeoutId)
-
-    const modal = document.querySelector('.modal')
-    modal.style.display = 'none'
-}
-
-function onBless() {
-    gModal.CurrTimeStr = getTime()
-
-    const modal = document.querySelector('.modal')
-    const elModalH2 = modal.querySelector('h2')
-    elModalH2.style.color = getRandomColor()
-
-    elModalH2.innerText = gModal.text + ' ' + gModal.CurrTimeStr
-    console.log('openModal')
-    openModal()
-}
-
-function onImgClicked() {
-    onBless()
-}
-function getTime() {
-    return new Date().toString().split(' ')[4]
-}
-
-function getRandomColor() {
-    const letters = '0123456789ABCDEF'
-    var color = '#'
-
-    for (var i = 0; i < 6; i++) {
-        color += letters[Math.floor(Math.random() * 16)]
+    } else if (board[i][j].minesAroundCount > 0) {
+        revealCell({ i, j })
+        return
     }
-    return color
+    updateGameEmoji(HAPPY)
+    setTimeout(updateGameEmoji, 1000, FACE);
+    revealCell({ i, j })
+
+    expandRevealNegs(board, i, j, elCell)
 }
 
-function mark(selector) {
-    var elMarkItems = document.querySelectorAll(selector)
+function checkGameOver() {
+    if (gGame.revealedCount === gLevel.SIZE ** 2 - gLevel.MINES && gGame.markedCount === gLevel.MINES) {
+        gGame.isWin = true
+        gGame.isOn = false
 
-    for (var i = 0; i < elMarkItems.length; i++) {
-        elMarkItems[i].classList.toggle('mark')
+        clearInterval(gStopWatchInterval)
+
+        const storedGame = createStoredGame()
+        gStoredGames.push(storedGame)
+        localStorage.setItem(gGame.level, JSON.stringify(gStoredGames))
+
+        blowMines()
+        revealMines()
+        updateGameEmoji(VICTORY)
+        showGameOverModal()
     }
+
+}
+
+function addMines(pos) {
+    for (var i = 0; i < gLevel.MINES; i++) {
+        var randPossibleMinePos = getRandPossibleMinePos(gBoard)
+
+        gBoard[randPossibleMinePos.i][randPossibleMinePos.j].isMine = true
+    }
+
+}
+
+function createStoredGame() {
+    console.log('gGame.secsPassed', gGame.secsPassed)
+    return {
+        fName: gSession.fName,
+        lName: gSession.lName,
+        secsPassed: gGame.secsPassed,
+    }
+}
+
+function onLevelSelect(level, levelStr) {
+    if (isSessionOff()) return
+
+    hideGameOverModal()
+    gLevel = {
+        SIZE: level.size,
+        MINES: level.mines
+    }
+
+    gStoredGames.push(gSession)
+
+    gGame.level = levelStr
+    clearInterval(gStopWatchInterval)
+    onInit()
+}
+
+function onRestart() {
+    localStorage.setItem(gSession.level, JSON.stringify(gStoredGames))
+    clearInterval(gStopWatchInterval)
+
+    onInit()
+}
+
+function updateTimePassed() {
+    const currTime = Date.now()
+    const delta = currTime - gStartTime
+    const secs = Math.floor(delta / 1000)
+    const milliSecs = (delta % 1000) / 1000
+
+    gGame.secsPassed = roundTo(secs + milliSecs, 1)
+}
+
+function handleSubmit(ev) {
+    ev.preventDefault()
+
+    const elSessionForm = document.querySelector('.session-form')
+    const fNameInput = elSessionForm.querySelector('#fname').value
+    const lNameInput = elSessionForm.querySelector('#lname').value
+
+    gSession.fName = fNameInput
+    gSession.lName = lNameInput
+
+    hideSessionForm()
 }

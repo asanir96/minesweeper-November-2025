@@ -48,68 +48,25 @@ function renderUpdatedBoard(mat) {
     }
 }
 
-// pos is an object like this - { i: 2, j: 7 }
-function renderCell(pos, value) {
-    // Select the elCell and set the value
-    const elCell = document.querySelector(`.cell-${pos.i}-${pos.j}`)
-    elCell.innerHTML = value
+function getGameLevel() {
+    switch (gLevel.SIZE) {
+        case BEGINNER.size:
+            return 'Beginner'
+        case MEDIUM.size:
+            return 'Medium'
+        case EXPERT.size:
+            return 'Expert'
+    }
+}
 
-    // if (value === GHOST) {
-    //     var elGhostContainer = elCell.document.querySelector('ghost-container')
-    //     elGhostContainer.style.backgroundColor = value.color
-    // }
+function isInitClicked() {
+    return (gGame.revealedCount !== 0 || gGame.markedCount !== 0)
 }
 
 function getRandomInt(min, max) {
     const minCeiled = Math.ceil(min);
     const maxFloored = Math.floor(max);
     return Math.floor(Math.random() * (maxFloored - minCeiled) + minCeiled); // The maximum is exclusive and the minimum is inclusive
-}
-
-function getRandomEmptyPos() {
-    const emptyPos = getEmptyPos()
-    const randIdx = getRandomInt(0, emptyPos.length)
-
-    return emptyPos[randIdx]
-}
-
-function getFoodCount() {
-    var foodCount = 0
-
-    for (var i = 0; i < gBoard.length; i++) {
-        for (var j = 0; j < gBoard[0].length; j++) {
-            if (gBoard[i][j] === FOOD || gBoard[i][j] === SUPER_FOOD) foodCount++
-        }
-    }
-
-    return foodCount
-}
-
-function getRandomColor() {
-    const letters = '0123456789ABCDEF'
-    var color = '#'
-
-    for (var i = 0; i < 6; i++) {
-        color += letters[Math.floor(Math.random() * 16)]
-    }
-    return color
-}
-
-function getGhostIdxByPos(pos, ghosts) {
-    for (var i = 0; i < ghosts.length; i++)
-        if (ghosts[i].pos.i === pos.i && ghosts[i].pos.j === pos.j) return i
-}
-
-
-function getEmptyPos() {
-    var emptyPos = []
-    for (var i = 0; i < gBoard.length; i++) {
-        for (var j = 0; j < gBoard.length; j++) {
-            if (!gBoard[i][j].isMine &&
-                !gBoard[i][j].isRevealed) emptyPos.push({ i, j })
-        }
-    }
-    return emptyPos
 }
 
 function clearIntervals() {
@@ -124,20 +81,10 @@ function clearTimeouts() {
     }
 }
 
-// function getRandomEmptyPos() {
-//     const emptyPos = getEmptyPos()
-
-//     const randI = getRandomIntInclusive(0, emptyPos.length - 1)
-//     const randEmptyPos = emptyPos[randI]
-
-//     return randEmptyPos
-// }
-
 function getCellHTML(cell) {
     const cellHTML = cell.isMine ? MINE : cell.minesAroundCount
     return cellHTML
 }
-
 
 function neighborsLoop(board, row, col, func) {
     const cell = board[row][col]
@@ -155,23 +102,6 @@ function neighborsLoop(board, row, col, func) {
 }
 
 
-
-function revealCell(pos) {
-    const cell = gBoard[pos.i][pos.j]
-    cell.isRevealed = true
-    gGame.revealedCount++
-
-    const elCell = document.querySelector(`.cell-${pos.i}-${pos.j}`)
-    const elCellSpan = elCell.querySelector(`.content`)
-    if (!cell.isMine) elCellSpan.innerText = cell.minesAroundCount
-
-    elCell.classList.toggle('revealed')
-    elCellSpan.style.display = 'block'
-}
-
-function getRandomMinePos() {
-
-}
 
 function getPossibleMinePos(board) {
     var possibleMinePos = []
@@ -193,13 +123,6 @@ function getRandPossibleMinePos(board) {
 
     return possibleMinePos[randIdx]
 }
-
-
-function isCountZeroNegs(cell, neighborCell) {
-    if (neighborCell.minesAroundCount === 0) cell.minesAroundCount++
-}
-
-
 
 function isCountZeroNegs(board, row, col) {
     for (var i = row - 1; i <= row + 1; i++) {
@@ -226,17 +149,28 @@ function roundTo(num, precision) {
     return Math.round(num * factor) / factor;
 }
 
-function strToObject(str) {
-    if (str[0] !== '{' || str[str.length - 1] !== '}') return null
-    
-    str = str.replace('{', ' ')
-    str = str.replace('}', ' ')
+function isSessionOff() {
+    return (gSession.fName === null || gSession.lName === null)
+}
 
-    const pairs = str.trim().split(',')
-    const object = {}
-    for (var i = 0; i < pairs.length; i++) {
-        const pair = pairs[i]
-        object[pair.split(':')[0]] = pair.split(':')[1]
+function bubbleSort(games) {
+    var sortedGames = games.slice()
+    var swapCount
+
+    while (swapCount !== 0) {
+        swapCount = 0
+
+        for (var i = 0; i < sortedGames.length - 1; i++) {
+            var currGame = sortedGames[i]
+            var nextGame = sortedGames[i + 1]
+
+            if (currGame.secsPassed > nextGame.secsPassed) {
+                swapCount += 1
+                sortedGames.splice(i, 1, nextGame)
+                sortedGames.splice(i + 1, 1, currGame)
+            }
+        }
+
     }
-    console.log('object', object)
+    return sortedGames
 }

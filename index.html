@@ -3,33 +3,20 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Try Stuff</title>
-    <link rel="stylesheet" href="css/main.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/app.css">
+    <title>Document</title>
 </head>
 
-<body onkeyup="onHandleKey(event)" onload="onInit()">
-    <h1>I like JS</h1>
-    <h2>its so... <span></span></h2>
-    
-    <div class="box">
-        <p>
-            Do the <span onclick="onChangeSubHeader(this)">difficult</span> things while they
-            are <span onclick="onChangeSubHeader(this)">easy</span> and do the great things while they are small.
-            A journey of a thousand miles must begin with a single step.
-        </p>
-        <img src="img/ninja.png" onclick="onImgClicked()" onmouseenter="onMouseEnter(this)"
-            onmouseleave="onMouseLeave(this)" />
+<body onload="onInit()">
+    <div class="board-container"></div>
+    <div class="modal"></div>
+    <div class="score-board">
     </div>
-
-    <button onclick="onMark(this)">Mark</button>
-    <button onclick="onBless()">Bless</button>
-
-    <div class="modal">
-        <button onclick="onCloseModal(this)">x</button>
-        <h2>Easy (Kal)</h2>
-    </div>
-
     <script src="js/main.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/user.js"></script>
 </body>
 
 </html>

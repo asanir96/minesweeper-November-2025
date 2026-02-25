@@ -61,34 +61,33 @@ table {
 	padding: 3px;
 	margin: auto;
 	color: rgb(1, 71, 1);
-	/* margin-left: 20px;
-	margin-right: 20px;
-	margin-top: 100px; */
 	font-size: 30px;
 }
 
-.session-form,
-.game-over {
+.modal {
 	position: absolute;
 	align-items: center;
-	top: 50%;
+	top: 30%;
 	left: 50%;
 	transform: translate(-50%, -50%);
-
-
-
-
+	display: none;
+	width: 300px;
+	height: 300px;
 	padding: 5px;
+}
+
+
+img {
+	margin: auto;
 }
 
 .game-over {
 	background-color: transparent;
-	display: none;
-	width: 300px;
-	height: 300px;
 }
 
 .session-form {
+	margin: auto;
+
 	opacity: 100%;
 	/* background-color: transparent; */
 	color: black;
@@ -101,10 +100,7 @@ table {
 	margin: 10px;
 }
 
-button {
-	position: relative;
-	bottom: 30%;
-}
+
 
 .game-over div {
 	margin: 10px auto;
@@ -121,9 +117,15 @@ button {
 	align-items: center;
 }
 
-button {
+.modal button {
+	position: relative;
+	bottom: 50px;
 	background-color: burlywood;
 	margin: auto 3px;
+}
+
+.score-board {
+	display: inline-block;
 }
 
 .score-board table {
@@ -132,11 +134,13 @@ button {
 	box-shadow: none;
 }
 
-.score-board td,th {
+.score-board td,
+th {
 	color: brown;
 }
 
-.score-board td,th {
+.score-board td,
+th {
 	padding: 3px;
 	border: 1px solid black;
 	border-collapse: collapse;
