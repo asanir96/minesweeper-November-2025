@@ -26,9 +26,9 @@ function renderBoard(mat, selector) {
         strHTML += '</tr>'
     }
     strHTML += '</tbody></table>'
-    strHTML += `<button class = "level-btn" onClick ="onLevelSelect(BEGINNER)">Beginner</button>`
-    strHTML += `<button class = "level-btn" onClick ="onLevelSelect(MEDIUM)">Medium</button>`
-    strHTML += `<button class = "level-btn" onClick ="onLevelSelect(EXPERT)">Expert</button>`
+    strHTML += `<button class = "level-btn" onClick ="onLevelSelect(BEGINNER,'Beginner')">Beginner</button>`
+    strHTML += `<button class = "level-btn" onClick ="onLevelSelect(MEDIUM, 'Medium')">Medium</button>`
+    strHTML += `<button class = "level-btn" onClick ="onLevelSelect(EXPERT, 'Expert')">Expert</button>`
 
     const elContainer = document.querySelector(selector)
     elContainer.innerHTML = strHTML
@@ -222,6 +222,21 @@ function updateGameEmoji(status) {
 }
 
 function roundTo(num, precision) {
-  const factor = Math.pow(10, precision);
-  return Math.round(num * factor) / factor;
+    const factor = Math.pow(10, precision);
+    return Math.round(num * factor) / factor;
+}
+
+function strToObject(str) {
+    if (str[0] !== '{' || str[str.length - 1] !== '}') return null
+    
+    str = str.replace('{', ' ')
+    str = str.replace('}', ' ')
+
+    const pairs = str.trim().split(',')
+    const object = {}
+    for (var i = 0; i < pairs.length; i++) {
+        const pair = pairs[i]
+        object[pair.split(':')[0]] = pair.split(':')[1]
+    }
+    console.log('object', object)
 }

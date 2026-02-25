@@ -13,14 +13,9 @@ table {
 	/* border: 1px solid lightgray; */
 }
 
-tbody {
-	box-shadow: 5px 5px 10px rgb(59, 58, 58);
-
-}
 
 .cell {
 	box-shadow: 1px 1px 1px 1px rgb(61, 60, 60);
-	/* border: 1px solid lightgray; */
 	width: 40px;
 	height: 40px;
 	font-size: 1.5em;
@@ -59,19 +54,20 @@ tbody {
 	background-color: rgb(69, 68, 68);
 }
 
-.stop-watch{
-		background-color: grey;
+.stop-watch {
+	background-color: grey;
 
 	box-shadow: inset 1px 1px 1px 1px rgb(62, 62, 62);
 	padding: 3px;
 	margin: auto;
-	color:rgb(1, 71, 1);
+	color: rgb(1, 71, 1);
 	/* margin-left: 20px;
 	margin-right: 20px;
 	margin-top: 100px; */
 	font-size: 30px;
 }
 
+.session-form,
 .game-over {
 	position: absolute;
 	align-items: center;
@@ -80,12 +76,29 @@ tbody {
 	transform: translate(-50%, -50%);
 
 
+
+
+	padding: 5px;
+}
+
+.game-over {
+	background-color: transparent;
 	display: none;
 	width: 300px;
 	height: 300px;
+}
 
-	padding: 5px;
-	background-color: transparent;
+.session-form {
+	opacity: 100%;
+	/* background-color: transparent; */
+	color: black;
+	/* border: 1px solid black; */
+	/* border-radius: 10% */
+
+}
+
+.session-form input {
+	margin: 10px;
 }
 
 button {
@@ -106,4 +119,25 @@ button {
 
 .board-container {
 	align-items: center;
+}
+
+button {
+	background-color: burlywood;
+	margin: auto 3px;
+}
+
+.score-board table {
+	border-collapse: collapse;
+	background-color: antiquewhite;
+	box-shadow: none;
+}
+
+.score-board td,th {
+	color: brown;
+}
+
+.score-board td,th {
+	padding: 3px;
+	border: 1px solid black;
+	border-collapse: collapse;
 }

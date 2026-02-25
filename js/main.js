@@ -25,7 +25,19 @@ const COLORS = {
     '7': 'red',
     '8': 'red',
 }
+var currSessionId = localStorage.getItem('sessionId')
+var newSessionId = currSessionId === null ? 1 : ++currSessionId
+localStorage.setItem('sessionId', newSessionId)
+console.log('newSessionId', newSessionId)
 var gStopWatchInterval
+var gSession = {
+    fName: null,
+    lName: null
+}
+
+
+var gStoredGames
+var gScoreBoard
 var gStartTime
 var gBoard
 var gGame
@@ -39,12 +51,25 @@ var gLevel = {
 }
 
 function onInit() {
+    gGame = createGame()
+    const storedSessionsStr = localStorage.getItem(gGame.level)
+    console.log('onInit --> storedSessionsStr', storedSessionsStr)
+    gStoredGames = storedSessionsStr === null ? [] : JSON.parse(storedSessionsStr)
+    console.log('gStoredSessions', gStoredGames)
+    renderScoreBoard(gStoredGames)
+    // const sessions = JSON.parse(gStoredSessions)
+    // console.log('sessions', sessions)
+    // buildScoreBoard(sessions)
+    // renderScoreBoard(scores)
+    hideGameOverModal()
+
+    showSessionForm()
     gBoard = buildBoard()
     renderBoard(gBoard, '.board-container')
 
-    gGame = createGame()
     gGame.isOn = true
 }
+
 
 function buildBoard() {
     var board = []
@@ -59,6 +84,20 @@ function buildBoard() {
 
     // setMinesNegsCount(board)
     return board
+}
+
+function buildScoreBoard(sessions) {
+    if (!sessions) return null
+
+    var scoreBoard = []
+
+    for (var i = 0; i < sessions.length; i++) {
+        var currSession = sessions[i]
+        scoreBoard.push([`${currSession.fName}_${currSession.lName}_${currSession.id}`])
+        scoreBoard.push([currSession.secsPassed])
+    }
+    console.log('scoreBoard', scoreBoard)
+    return scoreBoard
 }
 
 function createCell() {
@@ -89,6 +128,7 @@ function updateMineNegs(cell, neighborCell) {
 
 function createGame() {
     const game = {
+        level: getGameLevel(),
         isOn: false,
         revealedCount: 0,
         markedCount: 0,
@@ -100,7 +140,7 @@ function createGame() {
 }
 
 function onCellClicked(i, j, elCell) {
-    if (!gGame.isOn) return
+    if (!gGame.isOn || isSessionOff()) return
 
     if (gGame.revealedCount === 0 && gGame.markedCount === 0) {
         initClick(i, j, elCell)
@@ -125,7 +165,7 @@ function onCellClicked(i, j, elCell) {
 }
 
 function onCellMarked(i, j, elCell) {
-    if (!gGame.isOn) return
+    if (!gGame.isOn || isSessionOff()) return
 
     if (gBoard[i][j].isRevealed) return
 
@@ -158,20 +198,6 @@ function expandReveal(board, elCell, i, j) {
     revealCell({ i, j })
 
     expandRevealNegs(board, i, j, elCell)
-    // for (var row = i - 1; row <= i + 1; row++) {
-    //     if (row < 0 || row >= board.length) continue
-
-    //     for (var col = j - 1; col <= j + 1; col++) {
-    //         if (col < 0 || col >= board[row].length) continue
-    //         if (i === row && j === col) continue
-
-    //         // func(cell, board[i][j])
-    //         expandReveal(board, elCell, row, col)
-    //     }
-    // }
-    // expandReveal(board, elCell, i - 1, j)
-    // expandReveal(board, elCell, i, j + 1)
-    // expandReveal(board, elCell, i, j - 1)
 }
 
 
@@ -179,10 +205,16 @@ function checkGameOver() {
     if (gGame.revealedCount === gLevel.SIZE ** 2 - gLevel.MINES && gGame.markedCount === gLevel.MINES) {
         gGame.isWin = true
         gGame.isOn = false
+
+        clearInterval(gStopWatchInterval)
+
+        const storedGame = createStoredGame()
+        gStoredGames.push(storedGame)
+        localStorage.setItem(gGame.level, JSON.stringify(gStoredGames))
+
         blowMines()
         revealMines()
         updateGameEmoji(VICTORY)
-        clearInterval(gStopWatchInterval)
         showGameOverModal()
     }
 
@@ -209,15 +241,26 @@ function addMines(pos) {
 }
 
 function mineClicked(i, j) {
+    gSession.isWin = false
+    gGame.isOn = false
+
+    clearInterval(gStopWatchInterval)
 
     const elCellContent = document.querySelector(`.cell.cell-${i}-${j} .content`)
     elCellContent.innerText = EXPLOSION
     revealCell({ i, j })
     updateGameEmoji(DEAD)
     revealMines()
-    gGame.isOn = false
     showGameOverModal()
-    clearInterval(gStopWatchInterval)
+}
+
+function createStoredGame() {
+    console.log('gGame.secsPassed', gGame.secsPassed)
+    return {
+        fName: gSession.fName,
+        lName: gSession.lName,
+        secsPassed: gGame.secsPassed,
+    }
 }
 
 function revealMines() {
@@ -256,18 +299,26 @@ function expandRevealNegs(board, i, j, elCell) {
     }
 }
 
-function onLevelSelect(level) {
+function onLevelSelect(level, levelStr) {
+    if (isSessionOff()) return
+
+    hideGameOverModal()
     gLevel = {
         SIZE: level.size,
         MINES: level.mines
     }
+
+    gStoredGames.push(gSession)
+
+    gGame.level = levelStr
     clearInterval(gStopWatchInterval)
     onInit()
 }
 
 function onRestart() {
-    hideGameOverModal()
+    localStorage.setItem(gSession.level, JSON.stringify(gStoredGames))
     clearInterval(gStopWatchInterval)
+
     onInit()
 }
 
@@ -277,14 +328,14 @@ function updateTimePassed() {
     const secs = Math.floor(delta / 1000)
     const milliSecs = (delta % 1000) / 1000
 
-    gGame.timePassed = roundTo(secs + milliSecs, 1)
+    gGame.secsPassed = roundTo(secs + milliSecs, 1)
     renderTimePassed()
 }
 
 function renderTimePassed() {
     const elStopWatch = document.querySelector('.stop-watch')
 
-    elStopWatch.innerText = gGame.timePassed % 1 === 0 ? gGame.timePassed + '.0' : gGame.timePassed
+    elStopWatch.innerText = gGame.secsPassed % 1 === 0 ? gGame.secsPassed + '.0' : gGame.secsPassed
 }
 
 
@@ -329,6 +380,89 @@ function showGameOverModal() {
 
 }
 function hideGameOverModal() {
+
+
     const elGameOverModal = document.querySelector('.game-over')
     elGameOverModal.style.display = 'none'
+}
+
+function showSessionForm() {
+    if (!(gSession.fName === null || gSession.lName === null)) return
+
+    const elBoardContainer = document.querySelector('.board-container')
+    const elScoreBoard = document.querySelector('.score-board')
+
+    elBoardContainer.style.opacity = '0.3'
+    elScoreBoard.style.opacity = '0.3'
+
+    const elSessionForm = document.querySelector('.session-form')
+    elSessionForm.style.display = 'block'
+    elSessionForm.style.opacity = '1'
+}
+
+function hideSessionForm() {
+    const elBoardContainer = document.querySelector('.board-container')
+    const elScoreBoard = document.querySelector('.score-board')
+
+    elBoardContainer.style.opacity = '1.0'
+    elScoreBoard.style.opacity = '1.0'
+    
+    const elSessionForm = document.querySelector('.session-form')
+    elSessionForm.style.display = 'none'
+}
+
+
+function handleSubmit(ev) {
+    ev.preventDefault()
+
+    const elSessionForm = document.querySelector('.session-form')
+    const fNameInput = elSessionForm.querySelector('#fname').value
+    const lNameInput = elSessionForm.querySelector('#lname').value
+
+    gSession.fName = fNameInput
+    gSession.lName = lNameInput
+
+    hideSessionForm()
+}
+
+function isSessionOff() {
+    return (gSession.fName === null || gSession.lName === null)
+}
+
+function renderScoreBoard(storedSessions) {
+    const elScoreBoard = document.querySelector('.score-board')
+
+    var strHTML =
+        `    <table>
+        <tbody>
+            <tr>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Time</th>
+            </tr>`
+
+    for (var i = 0; i < storedSessions.length; i++) {
+        var currSession = storedSessions[i]
+        strHTML +=
+            `<tr>
+                <td>${currSession.fName}</td>
+                <td>${currSession.lName}</td>
+                <td>${currSession.secsPassed}</td>
+            </tr>`
+
+    }
+    strHTML += '</tbody></table>'
+
+    elScoreBoard.innerHTML = strHTML
+}
+
+function getGameLevel() {
+    switch (gLevel.SIZE) {
+        case BEGINNER.size:
+            return 'Beginner'
+        case MEDIUM.size:
+            return 'Medium'
+        case EXPERT.size:
+            return 'Expert'
+    }
 }
