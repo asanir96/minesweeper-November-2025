@@ -31,7 +31,7 @@ const COLORS = {
 const BEGINNER = { size: 4, mines: 2 }
 const MEDIUM = { size: 8, mines: 14 }
 const EXPERT = { size: 12, mines: 32 }
-
+var gGameOverModalTimeout
 var gStopWatchInterval
 var gStoredGames
 var gScoreBoard
@@ -163,7 +163,9 @@ function checkGameOver() {
         blowMines()
         revealMines()
         updateGameEmoji(VICTORY)
-        showGameOverModal()
+        updateGameOverModal()
+        gGameOverModalTimeout = setTimeout(showGameOverModal, 1500)
+
     }
 
 }
@@ -185,21 +187,7 @@ function createStoredGame() {
     }
 }
 
-function onLevelSelect(level, levelStr) {
-    if (isSessionOff()) return
 
-    hideGameOverModal()
-    gLevel = {
-        SIZE: level.size,
-        MINES: level.mines
-    }
-
-    gStoredGames.push(gSession)
-
-    gGame.level = levelStr
-    clearInterval(gStopWatchInterval)
-    onInit()
-}
 
 function onRestart() {
     localStorage.setItem(gSession.level, JSON.stringify(gStoredGames))

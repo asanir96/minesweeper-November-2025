@@ -1,7 +1,7 @@
 'use strict'
 
 const sessionFormHTML =
-    `    <form class="session-form" onsubmit="handleSubmit(event)">
+    `<form class="session-form" onsubmit="handleSubmit(event)">
         <div><img src="img/logo4.png" alt=""></div>
         First name:
         <input type="text" id="fname" name="fname" /><br>
@@ -10,8 +10,8 @@ const sessionFormHTML =
         <input type="submit" id="submit" value="Play!" />
     </form>`
 
-function showGameOverModal() {
 
+function updateGameOverModal() {
     const gameOverLogo = gGame.isWin ? WIN_LOGO : LOSE_LOGO
 
     const gameOverHTML =
@@ -19,16 +19,20 @@ function showGameOverModal() {
         <div>${gameOverLogo}</div>
         <button onclick="onRestart()">Play Again</button>
     </div>`
-
+    
     const elModal = document.querySelector('.modal')
     elModal.innerHTML = gameOverHTML
+}
 
+function showGameOverModal() {
     const elBoardContainer = document.querySelector('.board-container')
     const elScoreBoard = document.querySelector('.score-board')
 
     elBoardContainer.style.opacity = '0.3'
     elScoreBoard.style.opacity = '0.3'
 
+
+    const elModal = document.querySelector('.modal')
     elModal.style.display = 'block'
 }
 

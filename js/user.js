@@ -114,11 +114,13 @@ function mineClicked(i, j) {
     revealCell({ i, j })
     updateGameEmoji(DEAD)
     revealMines()
-    showGameOverModal()
+    updateGameOverModal()
+    gGameOverModalTimeout = setTimeout(showGameOverModal, 1500);
+
 }
 
 function onLevelSelect(level, levelStr) {
-    if (isSessionOff()) return
+    if (isSessionOff() || !gGame.isOn) return
 
     hideGameOverModal()
     gLevel = {
