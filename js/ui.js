@@ -11,22 +11,24 @@ const sessionFormHTML =
     </form>`
 
 function showGameOverModal() {
+
+    const gameOverLogo = gGame.isWin ? WIN_LOGO : LOSE_LOGO
+
+    const gameOverHTML =
+        `    <div class="game-over">
+        <div>${gameOverLogo}</div>
+        <button onclick="onRestart()">Play Again</button>
+    </div>`
+
+    const elModal = document.querySelector('.modal')
+    elModal.innerHTML = gameOverHTML
+
     const elBoardContainer = document.querySelector('.board-container')
     const elScoreBoard = document.querySelector('.score-board')
 
     elBoardContainer.style.opacity = '0.3'
     elScoreBoard.style.opacity = '0.3'
 
-    const gameOverMsg = gGame.isWin ? WIN_LOGO : LOSE_LOGO
-
-    const gameOverHTML =
-        `    <div class="game-over">
-        <div>${gameOverMsg}</div>
-        <button onclick="onRestart()">Play Again</button>
-    </div>`
-
-    const elModal = document.querySelector('.modal')
-    elModal.innerHTML = gameOverHTML
     elModal.style.display = 'block'
 }
 
@@ -83,7 +85,6 @@ function renderScoreBoard(sortedGames, maxGameCount) {
 
     for (var i = 0; i < maxGameCount; i++) {
         var currSession = sortedGames[i]
-        console.log('currSession', currSession)
         if (currSession) {
             strHTML +=
                 `<tr>
@@ -97,7 +98,6 @@ function renderScoreBoard(sortedGames, maxGameCount) {
         `</tbody>
     </table>`
 
-    console.log('strHTML', strHTML)
     elScoreBoard.innerHTML = strHTML
 }
 

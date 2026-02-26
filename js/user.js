@@ -1,6 +1,8 @@
 'use strict'
 
 function onCellClicked(i, j, elCell) {
+    console.log('onCellMarked --> gGame.markedCount', gGame.markedCount)
+    console.log('onCellMarked --> gGame.revealedCount', gGame.revealedCount)
     if (!gGame.isOn || isSessionOff()) return
 
     if (!isInitClicked()) {
@@ -26,12 +28,19 @@ function onCellClicked(i, j, elCell) {
 }
 
 function onCellMarked(i, j, elCell) {
+    console.log('onCellMarked --> gGame.markedCount', gGame.markedCount)
+    console.log('onCellMarked --> gGame.revealedCount', gGame.revealedCount)
     if (!gGame.isOn || isSessionOff() || !isInitClicked()) return
 
     if (gBoard[i][j].isRevealed) return
 
-    gBoard[i][j].isMarked = !gBoard[i][j].isMarked
-    gGame.markedCount++
+    if (!gBoard[i][j].isMarked) {
+        gBoard[i][j].isMarked = true
+        gGame.markedCount++
+    } else {
+        gBoard[i][j].isMarked = false
+        gGame.markedCount--
+    }
 
     const elMark = elCell.querySelector('.mark')
 

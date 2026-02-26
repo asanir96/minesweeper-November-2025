@@ -51,7 +51,8 @@ var gLevel = {
 
 function onInit() {
     gGame = createGame()
-
+    console.log('onInit --> gGame.markedCount', gGame.markedCount)
+    console.log('onInit --> gGame.revealedCount', gGame.revealedCount)
     const storedGamesStr = localStorage.getItem(gGame.level)
     gStoredGames = storedGamesStr === null ? [] : JSON.parse(storedGamesStr)
     gStoredGames = bubbleSort(gStoredGames)
@@ -103,7 +104,6 @@ function buildScoreBoard(sessions) {
         scoreBoard.push([`${currSession.fName}_${currSession.lName}_${currSession.id}`])
         scoreBoard.push([currSession.secsPassed])
     }
-    console.log('scoreBoard', scoreBoard)
     return scoreBoard
 }
 
@@ -178,7 +178,6 @@ function addMines(pos) {
 }
 
 function createStoredGame() {
-    console.log('gGame.secsPassed', gGame.secsPassed)
     return {
         fName: gSession.fName,
         lName: gSession.lName,
