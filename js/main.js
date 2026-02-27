@@ -12,7 +12,7 @@ const FACE = '🙂'
 const HAPPY = '😀'
 const DEAD = '😵'
 const EXPLOSION = '💥'
-const VICTORY = '😎'
+const VICTORY = '🖕😎🤙'
 const LOSE_LOGO = `<img src="img/game-over-logo.png" alt="">`
 const WIN_LOGO = `<img src="img/win-logo.png" alt="">`
 
@@ -31,7 +31,9 @@ const COLORS = {
 const BEGINNER = { size: 4, mines: 2 }
 const MEDIUM = { size: 8, mines: 14 }
 const EXPERT = { size: 12, mines: 32 }
+
 var gGameOverModalTimeout
+var gEmojiTimeout
 var gStopWatchInterval
 var gStoredGames
 var gScoreBoard
@@ -50,6 +52,7 @@ var gLevel = {
 }
 
 function onInit() {
+    clearTimeout(gEmojiTimeout)
     gGame = createGame()
     console.log('onInit --> gGame.markedCount', gGame.markedCount)
     console.log('onInit --> gGame.revealedCount', gGame.revealedCount)
@@ -142,8 +145,7 @@ function expandReveal(board, elCell, i, j) {
         revealCell({ i, j })
         return
     }
-    updateGameEmoji(HAPPY)
-    setTimeout(updateGameEmoji, 1000, FACE);
+
     revealCell({ i, j })
 
     expandRevealNegs(board, i, j, elCell)
@@ -186,8 +188,6 @@ function createStoredGame() {
         secsPassed: gGame.secsPassed,
     }
 }
-
-
 
 function onRestart() {
     localStorage.setItem(gSession.level, JSON.stringify(gStoredGames))

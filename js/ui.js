@@ -4,9 +4,9 @@ const sessionFormHTML =
     `<form class="session-form" onsubmit="handleSubmit(event)">
         <div><img src="img/logo4.png" alt=""></div>
         First name:
-        <input type="text" id="fname" name="fname" /><br>
+        <input type="text" id="fname" name="fname" required/><br>
         Last name:
-        <input type="text" id="lname" name="lname" /><br>
+        <input type="text" id="lname" name="lname" required/><br>
         <input type="submit" id="submit" value="Play!" />
     </form>`
 
@@ -167,10 +167,15 @@ function renderUpdatedBoard(mat) {
 }
 
 function updateGameEmoji(status) {
+
     const elGameEmoji = document.querySelector('.game-emoji')
     elGameEmoji.innerText = status
 }
-
+function resetGameEmoji() {
+    
+    const elGameEmoji = document.querySelector('.game-emoji')
+    elGameEmoji.innerText = FACE
+}
 function revealMines() {
     for (var i = 0; i < gBoard.length; i++) {
         for (var j = 0; j < gBoard.length; j++) {

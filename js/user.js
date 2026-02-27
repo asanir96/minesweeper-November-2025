@@ -1,9 +1,8 @@
 'use strict'
 
 function onCellClicked(i, j, elCell) {
-    console.log('onCellMarked --> gGame.markedCount', gGame.markedCount)
-    console.log('onCellMarked --> gGame.revealedCount', gGame.revealedCount)
     if (!gGame.isOn || isSessionOff()) return
+
 
     if (!isInitClicked()) {
         initClick(i, j, elCell)
@@ -18,18 +17,20 @@ function onCellClicked(i, j, elCell) {
     }
 
     if (gBoard[i][j].minesAroundCount === 0) {
+        updateGameEmoji(HAPPY)
+        gEmojiTimeout = setTimeout(resetGameEmoji, 1000);
+        console.log('gBoard[i][j].minesAroundCount condition--> gEmojiTimeout', gEmojiTimeout)
         expandReveal(gBoard, elCell, i, j)
         checkGameOver()
         return
     }
+
 
     revealCell({ i, j })
     checkGameOver()
 }
 
 function onCellMarked(i, j, elCell) {
-    console.log('onCellMarked --> gGame.markedCount', gGame.markedCount)
-    console.log('onCellMarked --> gGame.revealedCount', gGame.revealedCount)
     if (!gGame.isOn || isSessionOff() || !isInitClicked()) return
 
     if (gBoard[i][j].isRevealed) return
@@ -92,6 +93,11 @@ function initClick(i, j, elCell) {
     gBoard[i][j].minesAroundCount = 0
     addMines({ i, j })
     setMinesNegsCount(gBoard)
+
+    updateGameEmoji(HAPPY)
+    gEmojiTimeout = setTimeout(resetGameEmoji, 1000);
+    console.log('initClick--> gEmojiTimeout', gEmojiTimeout)
+
     expandReveal(gBoard, elCell, i, j)
     renderUpdatedBoard(gBoard)
 
@@ -107,7 +113,9 @@ function mineClicked(i, j) {
     gSession.isWin = false
     gGame.isOn = false
 
+    console.log('gEmojiTimeout', gEmojiTimeout)
     clearInterval(gStopWatchInterval)
+    clearTimeout(gEmojiTimeout)
 
     const elCellContent = document.querySelector(`.cell.cell-${i}-${j} .content`)
     elCellContent.innerText = EXPLOSION
