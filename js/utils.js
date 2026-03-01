@@ -1,38 +1,6 @@
 'use strict'
 
-function renderBoard(mat, selector) {
 
-    var strHTML = '<table><tbody>'
-    // strHTML += `<tr><td class = "game-emoji" colspan="${mat[0].length}">${FACE}</td></tr>`
-    strHTML += `<button class = "game-emoji" onclick = "onRestart()">🙂</button>`
-    strHTML += `<span class="stop-watch">0.0</span>`
-
-    for (var i = 0; i < mat.length; i++) {
-
-        strHTML += '<tr>'
-        for (var j = 0; j < mat[0].length; j++) {
-
-            // const cell = getCellHTML(mat[i][j])
-            const cell = 0
-            const className = `cell cell-${i}-${j}`
-
-            strHTML += `<td class="${className}" 
-                        onClick = "onCellClicked(${i}, ${j}, this)"
-                        oncontextmenu="onCellMarked(${i}, ${j}, this)">
-                            <span class="content">${cell}</span>
-                            <span class="mark"></span>
-                        </td>`
-        }
-        strHTML += '</tr>'
-    }
-    strHTML += '</tbody></table>'
-    strHTML += `<button class = "level-btn" onClick ="onLevelSelect(BEGINNER,'Beginner')">Beginner</button>`
-    strHTML += `<button class = "level-btn" onClick ="onLevelSelect(MEDIUM, 'Medium')">Medium</button>`
-    strHTML += `<button class = "level-btn" onClick ="onLevelSelect(EXPERT, 'Expert')">Expert</button>`
-
-    const elContainer = document.querySelector(selector)
-    elContainer.innerHTML = strHTML
-}
 
 function renderUpdatedBoard(mat) {
     for (var i = 0; i < mat.length; i++) {
@@ -173,4 +141,20 @@ function bubbleSort(games) {
 
     }
     return sortedGames
+}
+
+function getHintCount(level) {
+    switch (level) {
+        case 'Beginner':
+            var hintCount = 0
+            break
+        case 'Medium':
+            var hintCount = 2
+            break
+        case 'Expert':
+            var hintCount = 3
+            break
+    }
+
+    return hintCount
 }

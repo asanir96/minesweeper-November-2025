@@ -1,9 +1,32 @@
+* {
+	box-sizing: border-box;
+}
+
 body {
 	position: relative;
-	background-color: white;
+	background-color: lightgray;
 	text-align: center;
 	color: lightgray;
 	font-family: Arial, Helvetica, sans-serif;
+}
+
+.hint {
+	position: relative;
+	font-size: 3rem;
+	text-align: center;
+	/* border: 1px black; */
+	color: black;
+	margin: 0.5rem;
+	cursor: pointer;
+}
+
+.hint:active {
+	color: rgb(255, 222, 164)
+}
+
+.hint.disabled:active {
+	color: rgb(255, 64, 0);
+
 }
 
 table {
@@ -16,9 +39,12 @@ table {
 
 .cell {
 	box-shadow: 1px 1px 1px 1px rgb(61, 60, 60);
+	border: none;
 	width: 40px;
 	height: 40px;
 	font-size: 1.5em;
+
+	transition: 0.3s
 }
 
 .content {
@@ -27,6 +53,12 @@ table {
 
 .cell:active {
 	background-color: rgb(69, 68, 68);
+	/* transition: 0.3s */
+}
+
+.cell:hover {
+	background-color: rgb(69, 68, 68);
+	/* transition: 0.3s */
 }
 
 .cell span {
@@ -37,6 +69,15 @@ table {
 	background-color: rgb(176, 174, 174);
 	box-shadow: inset 1px 1px 1px 1px rgb(62, 62, 62);
 
+}
+
+.cell.hint-revealed {
+	border: 3px solid burlywood;
+	transition: 0.3s
+}
+
+.cell.hint-revealed .content {
+	color: burlywood;
 }
 
 .game-emoji {
@@ -144,4 +185,16 @@ th {
 	padding: 3px;
 	border: 1px solid black;
 	border-collapse: collapse;
+}
+
+.hover {
+	background-color: burlywood;
+}
+
+.hover:active {
+	background-color: burlywood;
+}
+
+.hover:hover {
+	background-color: burlywood;
 }

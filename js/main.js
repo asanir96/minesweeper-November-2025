@@ -12,7 +12,8 @@ const FACE = '🙂'
 const HAPPY = '😀'
 const DEAD = '😵'
 const EXPLOSION = '💥'
-const VICTORY = '🖕😎🤙'
+const HINT = '&#9728;'
+const VICTORY = '😎🤙'
 const LOSE_LOGO = `<img src="img/game-over-logo.png" alt="">`
 const WIN_LOGO = `<img src="img/win-logo.png" alt="">`
 
@@ -32,6 +33,7 @@ const BEGINNER = { size: 4, mines: 2 }
 const MEDIUM = { size: 8, mines: 14 }
 const EXPERT = { size: 12, mines: 32 }
 
+var gHints
 var gGameOverModalTimeout
 var gEmojiTimeout
 var gStopWatchInterval
@@ -54,8 +56,9 @@ var gLevel = {
 function onInit() {
     clearTimeout(gEmojiTimeout)
     gGame = createGame()
-    console.log('onInit --> gGame.markedCount', gGame.markedCount)
-    console.log('onInit --> gGame.revealedCount', gGame.revealedCount)
+    gHints = createHints()
+
+
     const storedGamesStr = localStorage.getItem(gGame.level)
     gStoredGames = storedGamesStr === null ? [] : JSON.parse(storedGamesStr)
     gStoredGames = bubbleSort(gStoredGames)
@@ -74,12 +77,15 @@ function createGame() {
     const game = {
         level: getGameLevel(),
         isOn: false,
+        hintIdxClicked: null,
+        isHintRevealed: false,
         revealedCount: 0,
         markedCount: 0,
         secsPassed: 0,
         isWin: false
     }
 
+    game.hintCount = getHintCount(game.level)
     return game
 }
 
@@ -115,7 +121,8 @@ function createCell() {
         minesAroundCount: null,
         isRevealed: false,
         isMine: false,
-        isMarked: false
+        isMarked: false,
+        color: null
     }
 
     return cell
@@ -216,4 +223,28 @@ function handleSubmit(ev) {
     gSession.lName = lNameInput
 
     hideSessionForm()
+}
+
+function createHints() {
+
+    const hints = []
+    for (var i = 0; i < gGame.hintCount; i++) {
+        var hint = {
+            isClicked: false,
+            isUsed: false,
+        }
+        hints.push(hint)
+    }
+    return hints
+}
+
+// function update
+
+function updateCellColors(board) {
+    for (var i = 0; i < board.length; i++) {
+        for (var j = 0; j < board[0].length; j++) {
+            var cell = gBoard[i][j]
+            cell.color = cell.isMine ? null : COLORS[cell.minesAroundCount]
+        }
+    }
 }

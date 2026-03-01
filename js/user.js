@@ -1,8 +1,12 @@
 'use strict'
 
 function onCellClicked(i, j, elCell) {
-    if (!gGame.isOn || isSessionOff()) return
+    if (!gGame.isOn || isSessionOff() || gGame.isHintRevealed) return
 
+    if (gGame.hintIdxClicked !== null && isInitClicked()) {
+        onHintReveal(i, j)
+        return
+    }
 
     if (!isInitClicked()) {
         initClick(i, j, elCell)
@@ -31,7 +35,7 @@ function onCellClicked(i, j, elCell) {
 }
 
 function onCellMarked(i, j, elCell) {
-    if (!gGame.isOn || isSessionOff() || !isInitClicked()) return
+    if (!gGame.isOn || isSessionOff() || !isInitClicked() || gGame.isHintRevealed) return
 
     if (gBoard[i][j].isRevealed) return
 
@@ -93,10 +97,10 @@ function initClick(i, j, elCell) {
     gBoard[i][j].minesAroundCount = 0
     addMines({ i, j })
     setMinesNegsCount(gBoard)
+    updateCellColors(gBoard)
 
     updateGameEmoji(HAPPY)
     gEmojiTimeout = setTimeout(resetGameEmoji, 1000);
-    console.log('initClick--> gEmojiTimeout', gEmojiTimeout)
 
     expandReveal(gBoard, elCell, i, j)
     renderUpdatedBoard(gBoard)
@@ -148,4 +152,81 @@ function onRestart() {
     clearInterval(gStopWatchInterval)
 
     onInit()
+}
+
+function onHintLogoClick(elHintLogo, hintIdx) {
+    console.log()
+    if (gHints[hintIdx].isUsed){
+        elHintLogo.style.opacity = '0.5'
+        elHintLogo.style.color = 'red'
+        setTimeout(() => {
+            elHintLogo.style.color = 'rgb(255, 222, 164)'
+        }, 100)
+        return
+    } else if (!isInitClicked() || gGame.hintIdxClicked !== null || gGame.isHintRevealed) {
+        elHintLogo.style.color = 'red'
+        setTimeout(() => {
+            elHintLogo.style.color = 'black'
+        }, 100)
+        return
+    }
+    
+    
+    elHintLogo.style.color = 'rgb(255, 222, 164)'
+    gHints[hintIdx].isClicked = true
+    gGame.hintIdxClicked = hintIdx
+}
+
+function onMouseHover(elCell, row, col) {
+    if (gGame.hintIdxClicked === null || gBoard[row][col].isRevealed) return
+
+    
+    clearHover()
+    elCell.classList.toggle('hover')
+    const cell = gBoard[row][col]
+
+    for (var i = row - 1; i <= row + 1; i++) {
+        if (i < 0 || i >= gBoard.length) continue
+
+        for (var j = col - 1; j <= col + 1; j++) {
+            if (j < 0 || j >= gBoard[i].length) continue
+            if (i === row && j === col) continue
+            var elNegCell = document.querySelector(`.cell.cell-${i}-${j}`)
+            elNegCell.classList.toggle('hover')
+        }
+    }
+
+}
+
+
+function onHintReveal(row, col) {
+    if (gBoard[row][col].isRevealed) return
+
+    gHints[gGame.hintIdxClicked].isUsed = true
+
+    var elHintClicked = document.querySelector(`.hint.hint-${gGame.hintIdxClicked}`)
+    console.log(`.hint.hint-${gGame.hindIdxClicked}`)
+    elHintClicked.style.opacity = '0.5'
+
+    gGame.hintIdxClicked = null
+    gGame.isHintRevealed = true
+    clearHover()
+
+    for (var i = row - 1; i <= row + 1; i++) {
+        if (i < 0 || i >= gBoard.length) continue
+
+        for (var j = col - 1; j <= col + 1; j++) {
+            if (j < 0 || j >= gBoard[i].length) continue
+            if (i === row && j === col) continue
+            if (gBoard[i][j].isRevealed) continue
+            if (gBoard[i][j].isMarked) continue
+            if (gBoard[i][j].isMine) continue
+
+            revealCell({ i, j }, gGame.isHintRevealed)
+        }
+    }
+
+    gGame.isHintClicked = false
+    gGame.hintCount--
+    setTimeout(hintHide, 1500, { i: row, j: col })
 }

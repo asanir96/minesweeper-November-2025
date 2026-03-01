@@ -19,7 +19,7 @@ function updateGameOverModal() {
         <div>${gameOverLogo}</div>
         <button onclick="onRestart()">Play Again</button>
     </div>`
-    
+
     const elModal = document.querySelector('.modal')
     elModal.innerHTML = gameOverHTML
 }
@@ -105,25 +105,62 @@ function renderScoreBoard(sortedGames, maxGameCount) {
     elScoreBoard.innerHTML = strHTML
 }
 
-function revealCell(pos) {
+function revealCell(pos, isHint) {
     const cell = gBoard[pos.i][pos.j]
-    cell.isRevealed = true
-    gGame.revealedCount++
 
     const elCell = document.querySelector(`.cell-${pos.i}-${pos.j}`)
     const elCellContent = elCell.querySelector(`.content`)
-    if (!cell.isMine) elCellContent.innerText = cell.minesAroundCount
 
-    elCell.classList.toggle('revealed')
-    elCellContent.style.display = 'block'
+
+    handleMineReveal(cell, elCellContent, elCell, isHint)
+    handleNonMineReveal(isHint, cell, elCell, elCellContent)
+
+}
+
+function handleNonMineReveal(isHint, cell, elCell, elCellContent) {
+    if (!isHint) {
+        cell.isRevealed = true
+        gGame.revealedCount++
+
+        elCell.classList.toggle('revealed')
+        elCellContent.style.display = 'block'
+    } else {
+        elCell.classList.toggle('hint-revealed')
+        elCellContent.style.color = 'burlywood'
+        elCellContent.style.display = 'block'
+
+        // setTimeout(() => {
+        //     elCell.classList.toggle('hint-revealed')
+        //     elCellContent.innerText = ''
+        //     elCellContent.style.display = 'block'
+
+        // }, 2500)
+    }
+}
+
+function handleMineReveal(cell, elCellContent, elCell, isHint) {
+    if (!cell.isMine) {
+        elCellContent.innerText = cell.minesAroundCount
+        // elCellContent.style.opacity = '0.3'
+
+    } else if (isHint) {
+        elCellContent.innerText = ''
+    }
 }
 
 function renderBoard(mat, selector) {
-
+    console.log('gHints', gHints)
     var strHTML = '<table><tbody>'
     // strHTML += `<tr><td class = "game-emoji" colspan="${mat[0].length}">${FACE}</td></tr>`
     strHTML += `<button class = "game-emoji" onclick = "onRestart()">🙂</button>`
     strHTML += `<span class="stop-watch">0.0</span>`
+
+    for (var i = 0; i < gHints.length; i++) {
+        strHTML += `<span class="hint hint-${i}" onClick = "onHintLogoClick(this, ${i})">
+                        ${HINT}
+
+                        </span>`
+    }
 
     for (var i = 0; i < mat.length; i++) {
 
@@ -135,7 +172,8 @@ function renderBoard(mat, selector) {
             const className = `cell cell-${i}-${j}`
 
             strHTML += `<td class="${className}" 
-                        onClick = "onCellClicked(${i}, ${j}, this)"
+                        onClick = "onCellClicked(${i}, ${j}, this)",
+                        onmouseover = "onMouseHover(this, ${i}, ${j})"
                         oncontextmenu="onCellMarked(${i}, ${j}, this)">
                             <span class="content">${cell}</span>
                             <span class="mark"></span>
@@ -160,7 +198,7 @@ function renderUpdatedBoard(mat) {
             const className = `.cell.cell-${i}-${j}`
             const elCellContent = document.querySelector(className + ' .content')
             elCellContent.innerText = cellHTML
-            elCellContent.style.color = COLORS[mat[i][j].minesAroundCount]
+            elCellContent.style.color = mat[i][j].color
 
         }
     }
@@ -171,11 +209,14 @@ function updateGameEmoji(status) {
     const elGameEmoji = document.querySelector('.game-emoji')
     elGameEmoji.innerText = status
 }
+
 function resetGameEmoji() {
-    
+
     const elGameEmoji = document.querySelector('.game-emoji')
     elGameEmoji.innerText = FACE
+
 }
+
 function revealMines() {
     for (var i = 0; i < gBoard.length; i++) {
         for (var j = 0; j < gBoard.length; j++) {
@@ -204,9 +245,50 @@ function renderTimePassed() {
 
     elStopWatch.innerText = gGame.secsPassed % 1 === 0 ? gGame.secsPassed + '.0' : gGame.secsPassed
 }
+
 function updateModal() {
 
 }
+
 function showModal() {
 
+}
+
+function clearHover() {
+    for (var i = 0; i < gBoard.length; i++) {
+        for (var j = 0; j < gBoard[0].length; j++) {
+            var elCell = document.querySelector(`.cell.cell-${i}-${j}`)
+            elCell.classList.remove('hover')
+        }
+    }
+}
+
+
+
+function hintHide(pos) {
+    // gHint.isRevealed = false
+    gGame.isHintRevealed = false
+
+    for (var i = pos.i - 1; i <= pos.i + 1; i++) {
+        if (i < 0 || i >= gBoard.length) continue
+
+        for (var j = pos.j - 1; j <= pos.j + 1; j++) {
+            if (j < 0 || j >= gBoard[i].length) continue
+            if (i === pos.i && j === pos.j) continue
+            if (gBoard[i][j].isRevealed) continue
+            if (gBoard[i][j].isMine) continue
+            if (gBoard[i][j].isMarked) continue
+
+            var cell = gBoard[i][j]
+            var className = `.cell.cell-${i}-${j}`
+            var elCell = document.querySelector(className)
+            var elCellContent = elCell.querySelector(' .content')
+            elCell.classList.toggle('hint-revealed')
+            elCellContent.style.color = cell.color
+            elCellContent.style.display = 'none'
+
+
+
+        }
+    }
 }
