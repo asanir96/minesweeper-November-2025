@@ -105,51 +105,65 @@ function renderScoreBoard(sortedGames, maxGameCount) {
     elScoreBoard.innerHTML = strHTML
 }
 
-function revealCell(pos, isHint) {
+function renderRevealedCell(pos) {
     const cell = gBoard[pos.i][pos.j]
 
     const elCell = document.querySelector(`.cell-${pos.i}-${pos.j}`)
     const elCellContent = elCell.querySelector(`.content`)
 
-
-    handleMineReveal(cell, elCellContent, elCell, isHint)
-    handleNonMineReveal(isHint, cell, elCell, elCellContent)
-
+    if (cell.isMine) renderRevealedMine(cell, elCellContent, elCell)
+    else renderRevealedNonMine(cell, elCell, elCellContent)
 }
 
-function handleNonMineReveal(isHint, cell, elCell, elCellContent) {
-    if (!isHint) {
-        cell.isRevealed = true
-        gGame.revealedCount++
+function renderRevealedMine(cell, elCellContent, elCell) {
+    const mineContent = gGame.isWin ? EXPLOSION : MINE
 
-        elCell.classList.toggle('revealed')
-        elCellContent.style.display = 'block'
-    } else {
-        elCell.classList.toggle('hint-revealed')
-        elCellContent.style.color = 'burlywood'
-        elCellContent.style.display = 'block'
-
-        // setTimeout(() => {
-        //     elCell.classList.toggle('hint-revealed')
-        //     elCellContent.innerText = ''
-        //     elCellContent.style.display = 'block'
-
-        // }, 2500)
+    if (cell.isMark) {
+        const ellCellMark = elCell.querySelector(' .mark')
+        ellCellMark.innerText = EMPTY
+        elCellContent.innerText = mineContent
+    } else if (cell.isRevealed) {
+        elCellContent.innerText = mineContent
     }
+
+    elCell.classList.toggle('revealed')
+    elCellContent.classList.toggle('hidden')
+    elCellContent.classList.toggle('revealed')
 }
 
-function handleMineReveal(cell, elCellContent, elCell, isHint) {
-    if (!cell.isMine) {
-        elCellContent.innerText = cell.minesAroundCount
-        // elCellContent.style.opacity = '0.3'
+function renderRevealedNonMine(cell, elCell, elCellContent) {
+    if (!cell.isRevealed) return
 
-    } else if (isHint) {
-        elCellContent.innerText = ''
-    }
+    elCellContent.innerText = cell.minesAroundCount
+
+    var className = getContentColorClass(cell)
+    elCell.classList.toggle('revealed')
+    elCell.classList.add('revealed')
+    elCell.classList.remove('hidden')
+
+    elCellContent.classList.remove('hidden')
+    elCellContent.classList.add('revealed')
+    elCellContent.classList.add(className)
+
+
+    elCellContent.style.display = 'block'
+
 }
+
+function renderHintRevealedCell(pos) {
+    const cell = gBoard[pos.i][pos.j]
+    const elCell = document.querySelector(`.cell-${pos.i}-${pos.j}`)
+    const elCellContent = elCell.querySelector(`.content`)
+
+    elCell.classList.toggle('hidden')
+    elCell.classList.toggle('hint-revealed')
+
+    elCellContent.classList.toggle('hidden')
+    elCellContent.classList.toggle('hint-revealed')
+}
+
 
 function renderBoard(mat, selector) {
-    console.log('gHints', gHints)
     var strHTML = '<table><tbody>'
     // strHTML += `<tr><td class = "game-emoji" colspan="${mat[0].length}">${FACE}</td></tr>`
     strHTML += `<button class = "game-emoji" onclick = "onRestart()">🙂</button>`
@@ -157,9 +171,9 @@ function renderBoard(mat, selector) {
 
     for (var i = 0; i < gHints.length; i++) {
         strHTML += `<span class="hint hint-${i}" onClick = "onHintLogoClick(this, ${i})">
-                        ${HINT}
-
-                        </span>`
+        ${HINT}
+        
+        </span>`
     }
 
     for (var i = 0; i < mat.length; i++) {
@@ -171,13 +185,13 @@ function renderBoard(mat, selector) {
             const cell = 0
             const className = `cell cell-${i}-${j}`
 
-            strHTML += `<td class="${className}" 
-                        onClick = "onCellClicked(${i}, ${j}, this)",
-                        onmouseover = "onMouseHover(this, ${i}, ${j})"
-                        oncontextmenu="onCellMarked(${i}, ${j}, this)">
-                            <span class="content">${cell}</span>
-                            <span class="mark"></span>
-                        </td>`
+            strHTML += `<td class="${className} " 
+            onClick = "onCellClicked(${i}, ${j}, this)",
+            onmouseover = "onMouseHover(this, ${i}, ${j})"
+            oncontextmenu="onCellMarked(${i}, ${j}, this)">
+            <span class="content hidden">${cell}</span>
+            <span class="mark"></span>
+            </td>`
         }
         strHTML += '</tr>'
     }
@@ -217,17 +231,6 @@ function resetGameEmoji() {
 
 }
 
-function revealMines() {
-    for (var i = 0; i < gBoard.length; i++) {
-        for (var j = 0; j < gBoard.length; j++) {
-            if (gBoard[i][j].isMine && !gBoard[i][j].isRevealed) {
-                const elCellMark = document.querySelector(`.cell.cell-${i}-${j} .mark`)
-                elCellMark.innerText = EMPTY
-                revealCell({ i, j })
-            }
-        }
-    }
-}
 
 function blowMines() {
     for (var i = 0; i < gBoard.length; i++) {
@@ -255,10 +258,12 @@ function showModal() {
 }
 
 function clearHover() {
+    clearInterval(gHintHoverAnimationInterval)
     for (var i = 0; i < gBoard.length; i++) {
         for (var j = 0; j < gBoard[0].length; j++) {
             var elCell = document.querySelector(`.cell.cell-${i}-${j}`)
             elCell.classList.remove('hover')
+            elCell.classList.remove('active')
         }
     }
 }
@@ -267,7 +272,7 @@ function clearHover() {
 
 function hintHide(pos) {
     // gHint.isRevealed = false
-    gGame.isHintRevealed = false
+    gGame.isHintModeOn = false
 
     for (var i = pos.i - 1; i <= pos.i + 1; i++) {
         if (i < 0 || i >= gBoard.length) continue
@@ -292,3 +297,109 @@ function hintHide(pos) {
         }
     }
 }
+
+// plan:
+// in logic: cell is recieving isHintRevealed: true
+// renderRevealedCell handles hint reveal timing logic
+
+
+function renderRevealedCells(pos) {
+    for (var i = 0; i < pos.length; i++) {
+        renderRevealedCell(pos[i])
+    }
+}
+
+function renderHiddenCells(pos) {
+    for (var i = 0; i < pos.length; i++) {
+        renderHiddenCell(pos[i])
+    }
+}
+
+
+function renderHiddenCell(pos) {
+    const className = `.cell.cell-${pos.i}-${pos.j}`
+
+    const elCell = document.querySelector(className)
+    const elCellContent = elCell.querySelector(' .content')
+
+    elCellContent.innerText = ''
+
+}
+
+function toggleRenderHintRevealNegs(gBoard, neighborsPos) {
+    for (var i = 0; i < neighborsPos.length; i++) {
+        var currNegPos = neighborsPos[i]
+
+        if (gBoard[currNegPos.i][currNegPos.j].isRevealed ||
+            gBoard[currNegPos.i][currNegPos.j].isMarked ||
+            gBoard[currNegPos.i][currNegPos.j].isMine) {
+            continue
+        }
+
+
+        var elCurrNeg = document.querySelector(`.cell-${currNegPos.i}-${currNegPos.j}`)
+        var elCurrNegContent = elCurrNeg.querySelector(' .content')
+
+        elCurrNeg.classList.toggle('hidden')
+        elCurrNeg.classList.toggle('hint-revealed')
+
+        elCurrNegContent.classList.toggle('hidden')
+        elCurrNegContent.classList.toggle('hint-revealed')
+    }
+    return neighborsPos
+}
+
+
+
+function renderMarkedCell(elCell, i, j) {
+    const elMark = elCell.querySelector('.mark')
+
+    if (gBoard[i][j].isMarked) elMark.innerText = MARK
+    else elMark.innerText = EMPTY
+
+    elMark.style.display = 'block'
+}
+
+function flashDisabledHint(elHintLogo) {
+    elHintLogo.classList.toggle('disabled')
+
+    setTimeout(() => {
+        elHintLogo.classList.toggle('disabled')
+    }, 100)
+
+}
+
+function hintHoverNegs(elCell, row, col) {
+    elCell.classList.toggle('hover')
+
+    for (var i = row - 1; i <= row + 1; i++) {
+        if (i < 0 || i >= gBoard.length) continue
+
+        for (var j = col - 1; j <= col + 1; j++) {
+            if (j < 0 || j >= gBoard[i].length) continue
+            if (i === row && j === col) continue
+            var elNegCell = document.querySelector(`.cell.cell-${i}-${j}`)
+            elNegCell.classList.toggle('hover')
+        }
+    }
+}
+
+
+// function renderRevealedCells(pos) {
+//     for (var i = 0; i < pos.length; i++) {
+//         var currPos = pos[i]
+//         var currCell = gBoard[currPos.i][currPos.j]
+//         var elCurrCell = document.querySelector(`.cell-${currPos.i}-${currPos.j}`)
+//         var elCurrCellContent = elCurrCell.querySelector(`.content`)
+
+//         switch (currCell) {
+//             case currCell.isRevealed && gGame.hintIdxClicked === null:
+//                 elCurrCell.classList.toggle('revealed')
+//                 elCurrCellContent.classList.toggle('hidden')
+//                 elCurrCellContent.classList.toggle('revealed')
+//                 break;
+
+//             case currCell.isRevealed
+//         }
+//     }
+// }

@@ -2,19 +2,7 @@
 
 
 
-function renderUpdatedBoard(mat) {
-    for (var i = 0; i < mat.length; i++) {
-        for (var j = 0; j < mat[0].length; j++) {
 
-            const cellHTML = getCellHTML(mat[i][j])
-            const className = `.cell.cell-${i}-${j}`
-            const elCellContent = document.querySelector(className + ' .content')
-            elCellContent.innerText = cellHTML
-            elCellContent.style.color = COLORS[mat[i][j].minesAroundCount]
-
-        }
-    }
-}
 
 function getGameLevel() {
     switch (gLevel.SIZE) {
@@ -69,7 +57,22 @@ function neighborsLoop(board, row, col, func) {
     }
 }
 
+function getNeighborPos(mat, row, col) {
+    const neighborPos = []
+    const cell = mat[row][col]
 
+    for (var i = row - 1; i <= row + 1; i++) {
+        if (i < 0 || i >= mat.length) continue
+
+        for (var j = col - 1; j <= col + 1; j++) {
+            if (j < 0 || j >= mat[i].length) continue
+            if (i === row && j === col) continue
+
+            neighborPos.push({ i, j })
+        }
+    }
+    return neighborPos
+}
 
 function getPossibleMinePos(board) {
     var possibleMinePos = []
@@ -157,4 +160,37 @@ function getHintCount(level) {
     }
 
     return hintCount
+}
+
+function getHintRevealedPos(board) {
+    for (var i = 0; i < board.length; i++) {
+
+    }
+}
+
+function getContentColorClass(cell) {
+    switch (cell.minesAroundCount) {
+        case 0:
+            console.log('hi')
+            return 'zero'
+        case 1:
+            return 'one'
+        case 2:
+            return 'two'
+        default:
+            return 'lt-et-three'
+    }   
+}
+
+function isCellInExpandRevealNegs(board, col, row, i, j) {
+    return (col >= 0 &&
+        col < board[row].length &&
+        !(i === row && j === col) &&
+        !board[row][col].isRevealed &&
+        !board[row][col].isMine)
+
+}
+
+function isHintModeActive() {
+    return (gGame.hintIdxClicked !== null && isInitClicked())
 }

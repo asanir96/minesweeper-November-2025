@@ -33,10 +33,12 @@ const BEGINNER = { size: 4, mines: 2 }
 const MEDIUM = { size: 8, mines: 14 }
 const EXPERT = { size: 12, mines: 32 }
 
+var opacityDelta = -1
 var gHints
 var gGameOverModalTimeout
 var gEmojiTimeout
 var gStopWatchInterval
+var gHintHoverAnimationInterval
 var gStoredGames
 var gScoreBoard
 var gStartTime
@@ -78,7 +80,7 @@ function createGame() {
         level: getGameLevel(),
         isOn: false,
         hintIdxClicked: null,
-        isHintRevealed: false,
+        isHintModeOn: false,
         revealedCount: 0,
         markedCount: 0,
         secsPassed: 0,
@@ -120,6 +122,7 @@ function createCell() {
     var cell = {
         minesAroundCount: null,
         isRevealed: false,
+        isHintRevealed: false,
         isMine: false,
         isMarked: false,
         color: null
@@ -131,8 +134,12 @@ function createCell() {
 function setMinesNegsCount(board) {
     for (var i = 0; i < board.length; i++) {
         for (var j = 0; j < board[i].length; j++) {
-            if (!board[i][j].isMine) board[i][j].minesAroundCount = 0
-            neighborsLoop(board, i, j, updateMineNegs)
+            if (!board[i][j].isMine) {
+                board[i][j].minesAroundCount = 0
+
+                neighborsLoop(board, i, j, updateMineNegs)
+
+            }
         }
     }
 }
@@ -141,43 +148,47 @@ function updateMineNegs(cell, neighborCell) {
     if (neighborCell.isMine) cell.minesAroundCount++
 }
 
-function expandReveal(board, elCell, i, j) {
-    if (i >= gBoard.length || i < 0 ||
-        j >= gBoard[0].length || j < 0 ||
-        board[i][j].isMine ||
-        board[i][j].isRevealed ||
-        board[i][j].isMarked) {
-        return
-    } else if (board[i][j].minesAroundCount > 0) {
-        revealCell({ i, j })
-        return
-    }
+function initClick(i, j, elCell) {
+    gBoard[i][j].minesAroundCount = 0
 
-    revealCell({ i, j })
+    addMines({ i, j })
+    setMinesNegsCount(gBoard)
 
-    expandRevealNegs(board, i, j, elCell)
+    // updateCellColors(gBoard)
+
+    updateGameEmoji(HAPPY)
+    gEmojiTimeout = setTimeout(resetGameEmoji, 1000);
+
+    expandReveal(gBoard, i, j)
+    renderUpdatedBoard(gBoard)
+
+    gStartTime = Date.now()
+    gStopWatchInterval = setInterval(() => {
+        updateTimePassed()
+        renderTimePassed()
+    }, 1)
 }
 
-function checkGameOver() {
-    if (gGame.revealedCount === gLevel.SIZE ** 2 - gLevel.MINES && gGame.markedCount === gLevel.MINES) {
-        gGame.isWin = true
-        gGame.isOn = false
+// function expandReveal(board, elCell, i, j) {
+//     const expandRevealedPos = []
+//     expandRevealedPos = getExpandRevealPos(expandRevealedPos)
+//     if (i >= gBoard.length || i < 0 ||
+//         j >= gBoard[0].length || j < 0 ||
+//         board[i][j].isMine ||
+//         board[i][j].isRevealed ||
+//         board[i][j].isMarked) {
+//         return
+//     } else if (board[i][j].minesAroundCount > 0) {
+//         revealCell({ i, j })
+//         return
+//     }
 
-        clearInterval(gStopWatchInterval)
+//     revealCell({ i, j })
+//     getNegsExpandedRevealPos(board, i, j, elCell)
+// }
 
-        const storedGame = createStoredGame()
-        gStoredGames.push(storedGame)
-        localStorage.setItem(gGame.level, JSON.stringify(gStoredGames))
 
-        blowMines()
-        revealMines()
-        updateGameEmoji(VICTORY)
-        updateGameOverModal()
-        gGameOverModalTimeout = setTimeout(showGameOverModal, 1500)
 
-    }
-
-}
 
 function addMines(pos) {
     for (var i = 0; i < gLevel.MINES; i++) {
@@ -232,6 +243,7 @@ function createHints() {
         var hint = {
             isClicked: false,
             isUsed: false,
+            color: 'black'
         }
         hints.push(hint)
     }
@@ -241,6 +253,7 @@ function createHints() {
 // function update
 
 function updateCellColors(board) {
+
     for (var i = 0; i < board.length; i++) {
         for (var j = 0; j < board[0].length; j++) {
             var cell = gBoard[i][j]
