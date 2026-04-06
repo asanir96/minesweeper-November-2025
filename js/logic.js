@@ -107,6 +107,8 @@ function expandRevealNegs(board, i, j) {
 }
 
 function isExpandRevealStop(board, i, j) {
+    console.log('i',i)
+    console.log('j',j)
     return (i >= board.length || i < 0 ||
         j >= board[0].length || j < 0 ||
         board[i][j].isMine ||

@@ -21,7 +21,7 @@ function onCellClicked(i, j, elCell) {
     }
 
     if (gBoard[i][j].minesAroundCount === 0) {
-        expandReveal(gBoard, elCell, i, j)
+        expandReveal(gBoard, i, j)
 
         checkGameOver()
 
